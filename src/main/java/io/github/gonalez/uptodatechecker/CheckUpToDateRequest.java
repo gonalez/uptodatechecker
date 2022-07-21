@@ -15,8 +15,6 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
-public interface UpToDateChecker {
-  ListenableFuture<CheckUpToDateRequest> checkUpToDate(CheckUpToDateRequest request);
+public interface CheckUpToDateRequest {
+  String url();
 }
