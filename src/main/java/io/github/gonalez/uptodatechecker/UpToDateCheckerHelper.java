@@ -15,11 +15,18 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.function.BiFunction;
 
 /** Provides helper functions for {@link UpToDateChecker}. */
 public final class UpToDateCheckerHelper {
   public static final BiFunction<String, String, Boolean> EQUAL_STRATEGY = String::equals;
 
+  public static <V>ListenableFuture<V> immediateNullFuture() {
+    return Futures.immediateFuture(null);
+  }
+  
   private UpToDateCheckerHelper() {}
 }

@@ -20,13 +20,15 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Optional;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 
 /**
  * The entry point of the UpToDateChecker library.
  */
+@ThreadSafe
 public interface UpToDateChecker {
   /** Functions to be called when calling {@link #checkUpToDate(CheckUpToDateRequest, Callback)}. */
   interface Callback {
@@ -85,9 +87,13 @@ public interface UpToDateChecker {
   
   /** Creates a new {@link UpToDateChecker} based on the given specifications. */
   static UpToDateChecker of(
-      Executor executor, UrlBytesReader urlBytesReader,
+      ExecutorService executorService, UrlBytesReader urlBytesReader,
       BiFunction<String, String, Boolean> matchStrategy, Optional<Callback> optionalCallback) {
-    return new UpToDateCheckerImpl(executor, urlBytesReader, matchStrategy, optionalCallback);
+    return new UpToDateCheckerImpl(
+        executorService,
+        urlBytesReader,
+        matchStrategy,
+        optionalCallback);
   }
   
   /**
@@ -98,4 +104,10 @@ public interface UpToDateChecker {
    * @return a future to a {@link CheckUpToDateResponse} representing the result of the given request.
    */
   ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
+  
+  /** Shut down this up-to-date checker, and cancel any active pending {@link #checkUpToDate(CheckUpToDateRequest, Callback) requests}. */
+  ListenableFuture<Void> shutdown();
+  
+  /** Resets the state of this checker. */
+  void clear();
 }
