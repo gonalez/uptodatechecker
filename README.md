@@ -1,6 +1,6 @@
 UpToDateChecker
 ============================
-UpToDateChecker is a small and basic library for checking if something is up-to-date or not, for a request containing an url and a version.
+UpToDateChecker is a small and basic library for checking if something is up-to-date or not, based on a request containing an url and a version.
 
 ## Examples
 The easiest way to check if something is up-to-date, in this example a spigot resource:
