@@ -19,7 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.github.gonalez.uptodatechecker.UpToDateCheckerHelper.immediateNullFuture;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -63,7 +65,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
       UrlBytesReader urlBytesReader,
       BiFunction<String, String, Boolean> versionMatchStrategy,
       Optional<UpToDateChecker.Callback> optionalCallback) {
-    this.executorService = checkNotNull(executorService);
+    this.executorService = executorService;
     this.urlBytesReader = checkNotNull(urlBytesReader);
     this.versionMatchStrategy = checkNotNull(versionMatchStrategy);
     this.optionalCallback = checkNotNull(optionalCallback);
@@ -77,59 +79,50 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
     } else {
       requestCallback = optionalCallback.orElse(callback);
     }
-    return FluentFuture.from(
-        Futures.submitAsync(
-            () -> {
-              if (cache.containsKey(request.urlToCheck())) {
-                return cache.get(request.urlToCheck());
-              }
-              
-              try {
-                // We create the string based off the read url-bytes from the given request {@code urlToCheck}
-                String urlBytesToString = new String(urlBytesReader.readUrlBytes(new URL(request.urlToCheck())));
-                // Determine if the version is up-to-date or not applying the function {@code versionMatchStrategy}
-                // using the request version against the parsed, url string
-                boolean versionMatch = versionMatchStrategy.apply(request.version(), urlBytesToString);
-                ListenableFuture<CheckUpToDateResponse> future = Futures.immediateFuture(
-                    CheckUpToDateResponse.newBuilder()
-                        .setData(urlBytesToString)
-                        .setIsUpToDate(versionMatch)
-                        .build());
-                if (requestCallback != null) {
-                  Futures.addCallback(future, new FutureCallback<CheckUpToDateResponse>() {
-                    @Override
-                    public void onSuccess(CheckUpToDateResponse result) {
-                      requestCallback.onSuccess(result);
-                      if (versionMatch) {
-                        requestCallback.onUpToDate(result);
-                      } else {
-                        requestCallback.onNotUpToDate(result);
-                      }
-                    }
+   return Futures.submitAsync(
+       () -> {
+         if (cache.containsKey(request.urlToCheck())) {
+           return cache.get(request.urlToCheck());
+         }
+      
+         try {
+           // We create the string based off the read url-bytes from the given request {@code urlToCheck}
+           String urlBytesToString = new String(urlBytesReader.readUrlBytes(new URL(request.urlToCheck())));
+           // Determine if the version is up-to-date or not applying the function {@code versionMatchStrategy}
+           // using the request version against the parsed, url string
+           boolean versionMatch = versionMatchStrategy.apply(request.version(), urlBytesToString);
+           ListenableFuture<CheckUpToDateResponse> future = Futures.immediateFuture(
+               CheckUpToDateResponse.newBuilder()
+                   .setData(urlBytesToString)
+                   .setIsUpToDate(versionMatch)
+                   .build());
+           if (requestCallback != null) {
+             Futures.addCallback(future, new FutureCallback<CheckUpToDateResponse>() {
+               @Override
+               public void onSuccess(CheckUpToDateResponse result) {
+                 requestCallback.onSuccess(result);
+                 if (versionMatch) {
+                   requestCallback.onUpToDate(result);
+                 } else {
+                   requestCallback.onNotUpToDate(result);
+                 }
+               }
             
-                    @Override
-                    public void onFailure(Throwable t) {
-                      requestCallback.onError(t);
-                    }
-                  });
-                }
-                cache.put(request.urlToCheck(), future);
-                return future;
-              } catch (MalformedURLException e) {
-                // Failed to parse url
-                return UpToDateCheckerException.ofCode(UpToDateCheckerExceptionCode.INVALID_URL_CODE).toImmediateFailedFuture();
-              } catch (IOException e) {
-                return UpToDateCheckerException.ofCode(UpToDateCheckerExceptionCode.FAIL_TO_READ_URL_BYTES_CODE).toImmediateFailedFuture();
-              }
-            }, executorService))
-        .catchingAsync(
-            UpToDateCheckerException.class,
-            exception -> {
-              if (requestCallback != null) {
-                requestCallback.onError(exception);
-              }
-              return Futures.immediateFailedFuture(exception);
-              }, executorService);
+               @Override
+               public void onFailure(Throwable t) {
+                 requestCallback.onError(t);
+               }
+             }, executorService);
+           }
+           cache.put(request.urlToCheck(), future);
+           return future;
+         } catch (MalformedURLException e) {
+           // Failed to parse url
+           return UpToDateCheckerException.ofCode(UpToDateCheckerExceptionCode.INVALID_URL_CODE).toImmediateFailedFuture();
+         } catch (IOException e) {
+           return UpToDateCheckerException.ofCode(UpToDateCheckerExceptionCode.FAIL_TO_READ_URL_BYTES_CODE).toImmediateFailedFuture();
+         }
+       }, executorService);
   }
   
   @Override

@@ -24,6 +24,7 @@ import java.util.function.BiFunction;
 public final class UpToDateCheckerHelper {
   public static final BiFunction<String, String, Boolean> EQUAL_STRATEGY = String::equals;
 
+  /** Returns a immediate, {@code ListenableFuture} whose value is null. */
   public static <V> ListenableFuture<V> immediateNullFuture() {
     return Futures.immediateFuture(null);
   }

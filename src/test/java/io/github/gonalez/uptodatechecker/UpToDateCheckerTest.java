@@ -17,18 +17,25 @@ package io.github.gonalez.uptodatechecker;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /** Tests for {@link UpToDateChecker}. */
 public class UpToDateCheckerTest {
   // ZNPCs resource id
   private static final String RESOURCE_ID = "80940";
   
+  private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
+  
   private final UpToDateChecker upToDateChecker =
-      new UpToDateCheckerImpl(MoreExecutors.directExecutor(), UrlBytesReader.defaultInstance(),
+      new UpToDateCheckerImpl(
+          EXECUTOR_SERVICE,
+          UrlBytesReader.defaultInstance(),
           UpToDateCheckerHelper.EQUAL_STRATEGY);
   
   @Test
@@ -59,12 +66,12 @@ public class UpToDateCheckerTest {
   }
   
   private ListenableFuture<Boolean> checkUpToDateMatching(String url, String version) {
+    return checkUpToDateMatching(CheckUpToDateRequest.newBuilder().setUrlToCheck(url).setVersion(version).build());
+  }
+  
+  private ListenableFuture<Boolean> checkUpToDateMatching(CheckUpToDateRequest checkUpToDateRequest) {
     SettableFuture<Boolean> matchSettableFuture = SettableFuture.create();
-    upToDateChecker.checkUpToDate(
-        CheckUpToDateRequest.newBuilder()
-            .setUrlToCheck(url)
-            .setVersion(version)
-            .build(),
+    upToDateChecker.checkUpToDate(checkUpToDateRequest,
         new UpToDateChecker.Callback() {
           @Override
           public void onUpToDate(CheckUpToDateResponse response) {
