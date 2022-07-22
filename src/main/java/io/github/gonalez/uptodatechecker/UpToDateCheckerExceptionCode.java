@@ -21,7 +21,10 @@ import javax.annotation.Nullable;
 
 /** Enumerates all possible error codes of an {@link UpToDateCheckerException}. */
 public enum UpToDateCheckerExceptionCode {
+  //
+  NO_CODE(0),
   
+  // Error when an url cannot be parsed
   INVALID_URL_CODE(300),
   FAIL_TO_READ_URL_BYTES_CODE(301);
   

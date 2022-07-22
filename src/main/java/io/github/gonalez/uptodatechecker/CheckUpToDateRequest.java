@@ -17,49 +17,50 @@ package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/** Request to check for up-to-date an url. */
 public interface CheckUpToDateRequest {
   static Builder newBuilder() {
     return new Builder.DefaultCheckUpToDateRequestBuilder();
   }
   
-  String ver();
-  String url();
+  String urlToCheck();
+  String version();
   
-  /** Builder for CheckUpToDateRequest. */
+  /** Builder for {@link CheckUpToDateRequest}. */
   interface Builder {
-    Builder setVer(String ver);
-    Builder setUrl(String url);
-  
+    Builder setUrlToCheck(String url);
+    Builder setVersion(String version);
+    
     CheckUpToDateRequest build();
     
     final class DefaultCheckUpToDateRequestBuilder implements Builder {
-      private String ver, url;
+      private String urlToCheck, version;
+  
+      @Override
+      public Builder setUrlToCheck(String urlToCheck) {
+        this.urlToCheck = urlToCheck;
+        return this;
+      }
+  
+      @Override
+      public Builder setVersion(String version) {
+        this.version = version;
+        return this;
+      }
       
       @Override
-      public Builder setVer(String ver) {
-        this.ver = ver;
-        return this;
-      }
-  
-      @Override
-      public Builder setUrl(String url) {
-        this.url = url;
-        return this;
-      }
-  
-      @Override
       public CheckUpToDateRequest build() {
-        checkNotNull(ver);
-        checkNotNull(url);
+        checkNotNull(urlToCheck);
+        checkNotNull(version);
         return new CheckUpToDateRequest() {
           @Override
-          public String ver() {
-            return ver;
+          public String urlToCheck() {
+            return urlToCheck;
           }
   
           @Override
-          public String url() {
-            return url;
+          public String version() {
+            return version;
           }
         };
       }

@@ -23,6 +23,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ *
+ */
 @SuppressWarnings("UnstableApiUsage")
 public class UrlBytesReaderImpl implements UrlBytesReader {
   public static final UrlBytesReader INSTANCE = new UrlBytesReaderImpl();

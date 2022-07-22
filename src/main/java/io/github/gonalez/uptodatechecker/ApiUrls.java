@@ -13,26 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.uptodatechecker;
 
-plugins {
-    id 'java'
-}
+import java.util.function.Function;
 
-group = 'io.github.gonalez.uptodatechecker'
-version = '0.1-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-    google()
-}
-
-dependencies {
-    implementation 'com.google.guava:guava:24.0-jre'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-}
-
-test {
-    useJUnitPlatform()
+/** Common api urls to be used for convenience when building a {@link CheckUpToDateRequest}. */
+// setUrlToCheck(ApiUrls.SPIGOT_API_URL.apply("80940"))
+public enum ApiUrls implements Function<String, String> {
+  SPIGOT_API_URL("https://api.spigotmc.org/legacy/update.php?resource=%s");
+  
+  final String apiUrl;
+  
+  private ApiUrls(String apiUrl) {
+    this.apiUrl = apiUrl;
+  }
+  
+  @Override
+  public String apply(String s) {
+    return String.format(apiUrl, s);
+  }
 }

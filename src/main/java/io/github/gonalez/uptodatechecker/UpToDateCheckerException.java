@@ -15,8 +15,12 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/** Exception thrown by {@link UpToDateChecker} when any error occurs. */
 public class UpToDateCheckerException extends Exception {
   public static Builder newBuilder() {
     return new Builder();
@@ -45,6 +49,10 @@ public class UpToDateCheckerException extends Exception {
   
   public UpToDateCheckerExceptionCode getExceptionCode() {
     return exceptionCode;
+  }
+  
+  public <V> ListenableFuture<V> toImmediateFailedFuture() {
+    return Futures.immediateFailedFuture(this);
   }
   
   public static final class Builder {

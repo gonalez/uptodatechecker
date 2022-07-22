@@ -13,26 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.gonalez.uptodatechecker;
 
-plugins {
-    id 'java'
-}
+import java.util.function.BiFunction;
 
-group = 'io.github.gonalez.uptodatechecker'
-version = '0.1-SNAPSHOT'
+/** Provides helper functions for {@link UpToDateChecker}. */
+public final class UpToDateCheckerHelper {
+  public static final BiFunction<String, String, Boolean> EQUAL_STRATEGY = String::equals;
 
-repositories {
-    mavenCentral()
-    google()
-}
-
-dependencies {
-    implementation 'com.google.guava:guava:24.0-jre'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-}
-
-test {
-    useJUnitPlatform()
+  private UpToDateCheckerHelper() {}
 }

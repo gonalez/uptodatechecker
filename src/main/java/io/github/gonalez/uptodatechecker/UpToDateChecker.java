@@ -15,25 +15,85 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.function.BiFunction;
 
+/**
+ * The entry point of the UpToDateChecker library.
+ */
 public interface UpToDateChecker {
   /** Functions to be called when calling {@link #checkUpToDate(CheckUpToDateRequest, Callback)}. */
   interface Callback {
+    static Callback chaining(Iterable<Callback> callbacks) {
+      return new ChainingUpToDateCheckerCallback(callbacks);
+    }
+    
     /** Called whenever a response has been completed. */
     default void onSuccess(CheckUpToDateResponse response) {}
     
     /** Called after {@link #onSuccess(CheckUpToDateResponse)}. */
-    default void onMatch(CheckUpToDateResponse response) {}
+    default void onUpToDate(CheckUpToDateResponse response) {}
     
     /** Called after {@link #onSuccess(CheckUpToDateResponse)}. */
-    default void onMismatch(CheckUpToDateResponse response) {}
+    default void onNotUpToDate(CheckUpToDateResponse response) {}
     
     /** Called if any error occurs. */
     default void onError(Throwable throwable) {}
+    
+    final class ChainingUpToDateCheckerCallback implements Callback {
+      private final Iterable<Callback> callbacks;
+      
+      public ChainingUpToDateCheckerCallback(Iterable<Callback> callbacks) {
+        this.callbacks = requireNonNull(callbacks);
+      }
+  
+      @Override
+      public void onSuccess(CheckUpToDateResponse response) {
+        for (Callback callback : callbacks) {
+          callback.onSuccess(response);
+        }
+      }
+  
+      @Override
+      public void onUpToDate(CheckUpToDateResponse response) {
+        for (Callback callback : callbacks) {
+          callback.onUpToDate(response);
+        }
+      }
+  
+      @Override
+      public void onNotUpToDate(CheckUpToDateResponse response) {
+        for (Callback callback : callbacks) {
+          callback.onNotUpToDate(response);
+        }
+      }
+      
+      @Override
+      public void onError(Throwable throwable) {
+        for (Callback callback : callbacks) {
+          callback.onError(throwable);
+        }
+      }
+    }
   }
   
+  static UpToDateChecker of(
+      Executor executor, UrlBytesReader urlBytesReader,
+      BiFunction<String, String, Boolean> matchStrategy,
+      Optional<Callback> optionalCallback) {
+    return new UpToDateCheckerImpl(executor, urlBytesReader, matchStrategy, optionalCallback);
+  }
+  
+  /**
+   * @param request
+   * @param callback
+   * @return
+   */
   ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
 }
