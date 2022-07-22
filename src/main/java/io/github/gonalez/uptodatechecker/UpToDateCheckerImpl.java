@@ -83,6 +83,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
               if (cache.containsKey(request.urlToCheck())) {
                 return cache.get(request.urlToCheck());
               }
+              
               try {
                 // We create the string based off the read url-bytes from the given request {@code urlToCheck}
                 String urlBytesToString = new String(urlBytesReader.readUrlBytes(new URL(request.urlToCheck())));
