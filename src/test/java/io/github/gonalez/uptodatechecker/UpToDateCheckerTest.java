@@ -67,12 +67,12 @@ public class UpToDateCheckerTest {
             .build(),
         new UpToDateChecker.Callback() {
           @Override
-          public void onMatch(CheckUpToDateResponse response) {
+          public void onUpToDate(CheckUpToDateResponse response) {
             matchSettableFuture.set(true);
           }
   
           @Override
-          public void onMismatch(CheckUpToDateResponse response) {
+          public void onNotUpToDate(CheckUpToDateResponse response) {
             matchSettableFuture.set(false);
           }
   
