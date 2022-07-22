@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** The response for a {@link CheckUpToDateRequest}. */
 public interface CheckUpToDateResponse {
+  /** Creates a new builder to create {@link CheckUpToDateResponse}s. */
   static Builder newBuilder() {
     return new Builder.DefaultCheckUpToDateResponseBuilder();
   }

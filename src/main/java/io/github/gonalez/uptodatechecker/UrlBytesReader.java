@@ -20,6 +20,7 @@ import java.net.URL;
 
 /** Responsible for reading bytes of a given url. */
 public interface UrlBytesReader {
+  /** @return a default, instance of UrlBytesReader. */
   static UrlBytesReader defaultInstance() {
     return UrlBytesReaderImpl.INSTANCE;
   }

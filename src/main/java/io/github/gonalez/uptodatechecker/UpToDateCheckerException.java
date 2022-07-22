@@ -22,10 +22,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Exception thrown by {@link UpToDateChecker} when any error occurs. */
 public class UpToDateCheckerException extends Exception {
+  /** Creates a new builder to create a {@link UpToDateCheckerException}. */
   public static Builder newBuilder() {
     return new Builder();
   }
   
+  /** */
   public static UpToDateCheckerException ofCode(UpToDateCheckerExceptionCode code) {
     return new UpToDateCheckerException(code);
   }

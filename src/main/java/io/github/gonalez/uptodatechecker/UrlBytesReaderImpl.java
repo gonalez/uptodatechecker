@@ -21,25 +21,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 
 /**
- *
+ * A basic, default implementation of {@link UrlBytesReader}.
  */
 @SuppressWarnings("UnstableApiUsage")
-public class UrlBytesReaderImpl implements UrlBytesReader {
+public final class UrlBytesReaderImpl implements UrlBytesReader {
   public static final UrlBytesReader INSTANCE = new UrlBytesReaderImpl();
   
   @Override
   public byte[] readUrlBytes(URL url) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    try {
-      URLConnection urlConnection = url.openConnection();
-      try (InputStream inputStream = urlConnection.getInputStream()) {
-        ByteStreams.copy(inputStream, out);
-      }
-    } catch (IOException e) {
-      throw new IOException(e);
+    try (InputStream inputStream = url.openConnection().getInputStream()) {
+      ByteStreams.copy(inputStream, out);
     }
     return out.toByteArray();
   }

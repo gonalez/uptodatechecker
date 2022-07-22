@@ -47,4 +47,9 @@ public enum UpToDateCheckerExceptionCode {
   UpToDateCheckerExceptionCode(int errorCode) {
     this.errorCode = errorCode;
   }
+  
+  /** Converts this code to a {@link UpToDateCheckerException}. */
+  public UpToDateCheckerException toException() {
+    return new UpToDateCheckerException(this);
+  }
 }
