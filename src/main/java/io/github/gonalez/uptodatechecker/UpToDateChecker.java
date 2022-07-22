@@ -17,6 +17,23 @@ package io.github.gonalez.uptodatechecker;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import javax.annotation.Nullable;
+
 public interface UpToDateChecker {
-  ListenableFuture<CheckUpToDateRequest> checkUpToDate(CheckUpToDateRequest request);
+  /** Functions to be called when calling {@link #checkUpToDate(CheckUpToDateRequest, Callback)}. */
+  interface Callback {
+    /** Called whenever a response has been completed. */
+    default void onSuccess(CheckUpToDateResponse response) {}
+    
+    /** Called after {@link #onSuccess(CheckUpToDateResponse)}. */
+    default void onMatch(CheckUpToDateResponse response) {}
+    
+    /** Called after {@link #onSuccess(CheckUpToDateResponse)}. */
+    default void onMismatch(CheckUpToDateResponse response) {}
+    
+    /** Called if any error occurs. */
+    default void onError(Throwable throwable) {}
+  }
+  
+  ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
 }

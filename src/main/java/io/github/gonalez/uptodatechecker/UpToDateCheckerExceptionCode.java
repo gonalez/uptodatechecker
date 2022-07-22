@@ -22,7 +22,8 @@ import javax.annotation.Nullable;
 /** Enumerates all possible error codes of an {@link UpToDateCheckerException}. */
 public enum UpToDateCheckerExceptionCode {
   
-  INVALID_URL_CODE(300);
+  INVALID_URL_CODE(300),
+  FAIL_TO_READ_URL_BYTES_CODE(301);
   
   private static final ImmutableMap<Integer, UpToDateCheckerExceptionCode> CODES_TO_EXCEPTION_CODE;
   static {

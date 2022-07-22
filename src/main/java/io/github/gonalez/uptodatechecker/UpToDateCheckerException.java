@@ -22,21 +22,25 @@ public class UpToDateCheckerException extends Exception {
     return new Builder();
   }
   
+  public static UpToDateCheckerException ofCode(UpToDateCheckerExceptionCode code) {
+    return new UpToDateCheckerException(code);
+  }
+  
   private final UpToDateCheckerExceptionCode exceptionCode;
   
   public UpToDateCheckerException(UpToDateCheckerExceptionCode exceptionCode) {
     super();
-    this.exceptionCode = exceptionCode;
+    this.exceptionCode = checkNotNull(exceptionCode);
   }
   
   public UpToDateCheckerException(String message, UpToDateCheckerExceptionCode exceptionCode) {
     super(message);
-    this.exceptionCode = exceptionCode;
+    this.exceptionCode = checkNotNull(exceptionCode);
   }
   
   public UpToDateCheckerException(String message, Throwable cause, UpToDateCheckerExceptionCode exceptionCode) {
     super(message, cause);
-    this.exceptionCode = exceptionCode;
+    this.exceptionCode = checkNotNull(exceptionCode);
   }
   
   public UpToDateCheckerExceptionCode getExceptionCode() {

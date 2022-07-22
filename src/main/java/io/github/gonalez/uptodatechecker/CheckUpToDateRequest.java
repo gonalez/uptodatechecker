@@ -15,6 +15,54 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public interface CheckUpToDateRequest {
+  static Builder newBuilder() {
+    return new Builder.DefaultCheckUpToDateRequestBuilder();
+  }
+  
+  String ver();
   String url();
+  
+  /** Builder for CheckUpToDateRequest. */
+  interface Builder {
+    Builder setVer(String ver);
+    Builder setUrl(String url);
+  
+    CheckUpToDateRequest build();
+    
+    final class DefaultCheckUpToDateRequestBuilder implements Builder {
+      private String ver, url;
+      
+      @Override
+      public Builder setVer(String ver) {
+        this.ver = ver;
+        return this;
+      }
+  
+      @Override
+      public Builder setUrl(String url) {
+        this.url = url;
+        return this;
+      }
+  
+      @Override
+      public CheckUpToDateRequest build() {
+        checkNotNull(ver);
+        checkNotNull(url);
+        return new CheckUpToDateRequest() {
+          @Override
+          public String ver() {
+            return ver;
+          }
+  
+          @Override
+          public String url() {
+            return url;
+          }
+        };
+      }
+    }
+  }
 }

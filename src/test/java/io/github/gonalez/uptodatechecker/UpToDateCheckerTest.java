@@ -17,31 +17,65 @@ package io.github.gonalez.uptodatechecker;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
 
 /** Tests for {@link UpToDateChecker}. */
 public class UpToDateCheckerTest {
-  private static final String EMPTY_STRING = "";
+  // ZNPCs resource id api url
+  private static final String RESOURCE_API_URL = "https://api.spigotmc.org/legacy/update.php?resource=80940";
   
-  private final UpToDateChecker upToDateChecker = new UpToDateCheckerImpl(MoreExecutors.directExecutor());
+  private final UpToDateChecker upToDateChecker = new UpToDateCheckerImpl(
+      MoreExecutors.directExecutor(), UrlBytesReader.defaultInstance(), String::equals);
   
   @Test
   public void testInvalidUrlCheckUpToDate() throws Exception {
     ExecutionException executionException =
         assertThrows(
             ExecutionException.class,
-            () -> upToDateChecker.checkUpToDate(new CheckUpToDateRequest() {
-              @Override
-              public String url() {
-                return EMPTY_STRING;
-              }
-            }).get());
+            () -> upToDateChecker.checkUpToDate(
+                CheckUpToDateRequest.newBuilder()
+                    .setUrl("")
+                    .setVer("")
+                    .build(),
+            new UpToDateChecker.Callback(){}).get());
     
     assertInstanceOf(UpToDateCheckerException.class, executionException.getCause());
     assertEquals(UpToDateCheckerExceptionCode.INVALID_URL_CODE,
         ((UpToDateCheckerException) executionException.getCause()).getExceptionCode());
+  }
+  
+  @Test
+  public void testMatch() throws Exception {
+    assertTrue(checkUpToDateMatching(RESOURCE_API_URL, "3.8").get());
+  }
+  
+  @Test
+  public void testMismatch() throws Exception {
+    assertFalse(checkUpToDateMatching(RESOURCE_API_URL, "1.0").get());
+  }
+  
+  
+  private ListenableFuture<Boolean> checkUpToDateMatching(String url, String ver) {
+    SettableFuture<Boolean> matchSettableFuture = SettableFuture.create();
+    upToDateChecker.checkUpToDate(
+        CheckUpToDateRequest.newBuilder()
+            .setUrl(url)
+            .setVer(ver)
+            .build(),
+        new UpToDateChecker.Callback() {
+          @Override
+          public void onMatch(CheckUpToDateResponse response) {
+            matchSettableFuture.set(true);
+          }
+  
+          @Override
+          public void onMismatch(CheckUpToDateResponse response) {
+            matchSettableFuture.set(false);
+          }
+        });
+    return matchSettableFuture;
   }
 }

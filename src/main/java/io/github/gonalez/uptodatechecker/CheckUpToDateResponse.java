@@ -15,5 +15,40 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public interface CheckUpToDateResponse {
+  static Builder newBuilder() {
+    return new Builder.DefaultCheckUpToDateResponseBuilder();
+  }
+  
+  String data();
+  
+  /** Builder for CheckUpToDateResponse. */
+  interface Builder {
+    Builder setData(String data);
+  
+    CheckUpToDateResponse build();
+    
+    final class DefaultCheckUpToDateResponseBuilder implements Builder {
+      private String data;
+      
+      @Override
+      public Builder setData(String data) {
+        this.data = data;
+        return this;
+      }
+  
+      @Override
+      public CheckUpToDateResponse build() {
+        checkNotNull(data);
+        return new CheckUpToDateResponse() {
+          @Override
+          public String data() {
+            return data;
+          }
+        };
+      }
+    }
+  }
 }
