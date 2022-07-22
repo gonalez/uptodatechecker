@@ -34,7 +34,7 @@ public interface UpToDateChecker {
       return new ChainingUpToDateCheckerCallback(callbacks);
     }
     
-    /** Called whenever a response has been completed. */
+    /** Called whenever a response has been completed with no errors. */
     default void onSuccess(CheckUpToDateResponse response) {}
     
     /** Called after {@link #onSuccess(CheckUpToDateResponse)}. */
@@ -83,17 +83,19 @@ public interface UpToDateChecker {
     }
   }
   
+  /** Creates a new {@link UpToDateChecker} based on the given specifications. */
   static UpToDateChecker of(
       Executor executor, UrlBytesReader urlBytesReader,
-      BiFunction<String, String, Boolean> matchStrategy,
-      Optional<Callback> optionalCallback) {
+      BiFunction<String, String, Boolean> matchStrategy, Optional<Callback> optionalCallback) {
     return new UpToDateCheckerImpl(executor, urlBytesReader, matchStrategy, optionalCallback);
   }
   
   /**
-   * @param request
-   * @param callback
-   * @return
+   * Asynchronously checks if the given request is up-to-date based on the request url and version.
+   *
+   * @param request the request.
+   * @param callback the optional callback to execute when the future has been completed.
+   * @return a future to a {@link CheckUpToDateResponse} representing the result of the given request.
    */
   ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
 }
