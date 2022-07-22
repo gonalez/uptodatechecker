@@ -24,19 +24,28 @@ public interface CheckUpToDateResponse {
   }
   
   String data();
+  boolean isUpToDate();
   
   /** Builder for {@link CheckUpToDateResponse}. */
   interface Builder {
     Builder setData(String data);
+    Builder setIsUpToDate(boolean isUpToDate);
   
     CheckUpToDateResponse build();
     
     final class DefaultCheckUpToDateResponseBuilder implements Builder {
       private String data;
+      private boolean upToDate;
       
       @Override
       public Builder setData(String data) {
         this.data = data;
+        return this;
+      }
+  
+      @Override
+      public Builder setIsUpToDate(boolean isUpToDate) {
+        this.upToDate = isUpToDate;
         return this;
       }
   
@@ -47,6 +56,11 @@ public interface CheckUpToDateResponse {
           @Override
           public String data() {
             return data;
+          }
+  
+          @Override
+          public boolean isUpToDate() {
+            return upToDate;
           }
         };
       }

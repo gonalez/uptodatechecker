@@ -86,6 +86,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                 ListenableFuture<CheckUpToDateResponse> future = Futures.immediateFuture(
                     CheckUpToDateResponse.newBuilder()
                         .setData(urlBytesString)
+                        .setIsUpToDate(versionMatch)
                         .build());
                 if (requestCallback != null) {
                   Futures.addCallback(future, new FutureCallback<CheckUpToDateResponse>() {
