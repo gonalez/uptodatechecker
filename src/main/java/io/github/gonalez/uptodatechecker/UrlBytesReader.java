@@ -18,7 +18,7 @@ package io.github.gonalez.uptodatechecker;
 import java.io.IOException;
 import java.net.URL;
 
-/** Responsible for reading bytes of a given url. */
+/** Responsible for reading the content of an url in bytes. */
 public interface UrlBytesReader {
   /** @return a default, instance of UrlBytesReader. */
   static UrlBytesReader defaultInstance() {
