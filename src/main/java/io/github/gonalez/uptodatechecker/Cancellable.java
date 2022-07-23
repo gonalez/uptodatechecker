@@ -18,5 +18,24 @@ package io.github.gonalez.uptodatechecker;
 /** Something that can be cancelled. */
 @FunctionalInterface
 public interface Cancellable {
+  static Cancellable chaining(Iterable<Cancellable> cancellables) {
+    return new ChainingCancellable(cancellables);
+  }
+  
   void cancel();
+  
+  final class ChainingCancellable implements Cancellable {
+    private final Iterable<Cancellable> cancellables;
+    
+    public ChainingCancellable(Iterable<Cancellable> cancellables) {
+      this.cancellables = cancellables;
+    }
+    
+    @Override
+    public void cancel() {
+      for (Cancellable cancellable : cancellables) {
+        cancellable.cancel();
+      }
+    }
+  }
 }
