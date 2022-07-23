@@ -88,6 +88,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                   // Determine if the version is up-to-date or not applying the function {@code versionMatchStrategy}
                   // using the request version against the parsed, url string
                   boolean matches = versionMatchStrategy.apply(request.version(), urlContentToString);
+                  
                   ListenableFuture<CheckUpToDateResponse> future = Futures.immediateFuture(
                       CheckUpToDateResponse.newBuilder()
                           .setData(urlContentToString)
