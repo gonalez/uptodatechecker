@@ -25,9 +25,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 
@@ -49,7 +48,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   private final BiFunction<String, String, Boolean> versionMatchStrategy;
   private final Optional<UpToDateChecker.Callback> optionalCallback;
   
-  private final Map<String, ListenableFuture<CheckUpToDateResponse>> cache = new HashMap<>();
+  private final ConcurrentHashMap<String, ListenableFuture<CheckUpToDateResponse>> futuresCache = new ConcurrentHashMap<>();
   
   public UpToDateCheckerImpl(
       ExecutorService executorService,
@@ -71,57 +70,59 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   
   @Override
   public ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback) {
+    if (futuresCache.containsKey(request.urlToCheck())) {
+      return futuresCache.get(request.urlToCheck());
+    }
     final Callback requestCallback;
     if (optionalCallback.isPresent() && callback != null) {
       requestCallback = Callback.chaining(ImmutableList.of(optionalCallback.get(), callback));
     } else {
       requestCallback = optionalCallback.orElse(callback);
     }
-   return FluentFuture.from(
-       Futures.submitAsync(
-           () -> {
-             if (cache.containsKey(request.urlToCheck())) {
-               return cache.get(request.urlToCheck());
-             }
-             // We create the string based off the read url-bytes from the given request {@code urlToCheck}
-             String urlContentToString = UpToDateCheckerHelper.urlContentToString(urlBytesReader, request.urlToCheck());
-             // Determine if the version is up-to-date or not applying the function {@code versionMatchStrategy}
-             // using the request version against the parsed, url string
-             boolean matches = versionMatchStrategy.apply(request.version(), urlContentToString);
-             ListenableFuture<CheckUpToDateResponse> future = Futures.immediateFuture(
-                 CheckUpToDateResponse.newBuilder()
-                     .setData(urlContentToString)
-                     .setIsUpToDate(matches)
-                     .build());
-             if (requestCallback != null) {
-               Futures.addCallback(future, new FutureCallback<CheckUpToDateResponse>() {
-                 @Override
-                 public void onSuccess(CheckUpToDateResponse result) {
-                   requestCallback.onSuccess(result);
-                   if (matches) {
-                     requestCallback.onUpToDate(result);
-                   } else {
-                     requestCallback.onNotUpToDate(result);
-                   }
-                 }
-      
-                 @Override
-                 public void onFailure(Throwable t) {
-                   requestCallback.onError(t);
-                 }
-               }, executorService);
-             }
-             cache.put(request.urlToCheck(), future);
-             return future;
-           }, executorService))
-       .catchingAsync(
-           Exception.class,
-           cause -> {
-             if (requestCallback != null) {
-               requestCallback.onError(cause);
-             }
-             return Futures.immediateFailedFuture(cause);
-           }, executorService);
+    ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
+        FluentFuture.from(
+            Futures.submitAsync(
+                () -> {
+                  // We create the string based off the read url-bytes from the given request {@code urlToCheck}
+                  String urlContentToString = UpToDateCheckerHelper.urlContentToString(urlBytesReader, request.urlToCheck());
+                  // Determine if the version is up-to-date or not applying the function {@code versionMatchStrategy}
+                  // using the request version against the parsed, url string
+                  boolean matches = versionMatchStrategy.apply(request.version(), urlContentToString);
+                  ListenableFuture<CheckUpToDateResponse> future = Futures.immediateFuture(
+                      CheckUpToDateResponse.newBuilder()
+                          .setData(urlContentToString)
+                          .setIsUpToDate(matches)
+                          .build());
+                  if (requestCallback != null) {
+                    Futures.addCallback(future, new FutureCallback<CheckUpToDateResponse>() {
+                      @Override
+                      public void onSuccess(CheckUpToDateResponse result) {
+                        requestCallback.onSuccess(result);
+                        if (matches) {
+                          requestCallback.onUpToDate(result);
+                        } else {
+                          requestCallback.onNotUpToDate(result);
+                        }
+                      }
+          
+                      @Override
+                      public void onFailure(Throwable t) {
+                        requestCallback.onError(t);
+                      }
+                    }, executorService);
+                  }
+                  return future;
+                }, executorService))
+            .catchingAsync(
+                Exception.class,
+                cause -> {
+                  if (requestCallback != null) {
+                    requestCallback.onError(cause);
+                  }
+                  return Futures.immediateFailedFuture(cause);
+                }, executorService);
+    futuresCache.put(request.urlToCheck(), responseListenableFuture);
+    return responseListenableFuture;
   }
   
   @Override
@@ -132,6 +133,6 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   
   @Override
   public void clear() {
-    executorService.execute(cache::clear);
+    futuresCache.clear();
   }
 }
