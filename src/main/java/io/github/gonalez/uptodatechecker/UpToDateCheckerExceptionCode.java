@@ -21,13 +21,14 @@ import javax.annotation.Nullable;
 
 /** Enumerates all possible error codes of an {@link UpToDateCheckerException}. */
 public enum UpToDateCheckerExceptionCode {
-  //
-  NO_CODE(0),
+  // Unspecified
+  UNSET_CODE(0),
   
-  // Error when an url cannot be parsed
+  // Url related errors
   INVALID_URL_CODE(300),
   FAIL_TO_READ_URL_BYTES_CODE(301);
   
+  // Mapping of all exception code values by its {@code errorCode}
   private static final ImmutableMap<Integer, UpToDateCheckerExceptionCode> CODES_TO_EXCEPTION_CODE;
   static {
     ImmutableMap.Builder<Integer, UpToDateCheckerExceptionCode> builder = ImmutableMap.builder();
@@ -37,6 +38,7 @@ public enum UpToDateCheckerExceptionCode {
     CODES_TO_EXCEPTION_CODE = builder.build();
   }
   
+  /** @return a {@link UpToDateCheckerExceptionCode} for the given {@code errorCode} or null if not code is found. */
   @Nullable
   public static UpToDateCheckerExceptionCode fromErrorCode(int errorCode) {
     return CODES_TO_EXCEPTION_CODE.get(errorCode);

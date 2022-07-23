@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Request to check for up-to-date an url. */
 public interface CheckUpToDateRequest {
-  /** Creates a new builder to create {@link CheckUpToDateRequest}s. */
+  /** Creates a new builder to create a {@link CheckUpToDateRequest}. */
   static Builder newBuilder() {
     return new Builder.DefaultCheckUpToDateRequestBuilder();
   }
@@ -32,6 +32,7 @@ public interface CheckUpToDateRequest {
     Builder setUrlToCheck(String url);
     Builder setVersion(String version);
     
+    /** @return a new {@link CheckUpToDateRequest} based from this builder. */
     CheckUpToDateRequest build();
     
     final class DefaultCheckUpToDateRequestBuilder implements Builder {

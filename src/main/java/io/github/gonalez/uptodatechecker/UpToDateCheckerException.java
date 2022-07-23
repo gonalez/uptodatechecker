@@ -15,10 +15,10 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Exception thrown by {@link UpToDateChecker} when any error occurs. */
 public class UpToDateCheckerException extends Exception {
@@ -27,7 +27,6 @@ public class UpToDateCheckerException extends Exception {
     return new Builder();
   }
   
-  /** */
   public static UpToDateCheckerException ofCode(UpToDateCheckerExceptionCode code) {
     return new UpToDateCheckerException(code);
   }

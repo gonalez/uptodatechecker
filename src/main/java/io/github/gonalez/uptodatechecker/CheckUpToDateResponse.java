@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /** The response for a {@link CheckUpToDateRequest}. */
 public interface CheckUpToDateResponse {
-  /** Creates a new builder to create {@link CheckUpToDateResponse}s. */
+  /** Creates a new builder to create a {@link CheckUpToDateResponse}. */
   static Builder newBuilder() {
     return new Builder.DefaultCheckUpToDateResponseBuilder();
   }
@@ -32,6 +32,7 @@ public interface CheckUpToDateResponse {
     Builder setData(String data);
     Builder setIsUpToDate(boolean isUpToDate);
   
+    /** @return a new {@link CheckUpToDateResponse} based from this builder. */
     CheckUpToDateResponse build();
     
     final class DefaultCheckUpToDateResponseBuilder implements Builder {
