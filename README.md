@@ -37,7 +37,22 @@ public class ExampleClass {
   }
 }
 ```
-
+Fluent Builder Call API
+-----------------------
+A builder to make calls (requests) to an UpToDateChecker easier. An example on how to use:
+```java
+Cancellable cancellable =
+    FluentUpToDateCheckerCall.newCall(
+        CheckUpToDateRequest.newBuilder()
+            .setUrlToCheck(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
+            .setVersion(/*versionToMatch*/)
+            .build())
+        .setShutdownOnCancel(true)
+        .withExecutorService(Executors.newSingleThreadExecutor())
+        .withMatchingStrategy(UpToDateCheckerHelper.EQUAL_STRATEGY)
+        .scheduling(12, TimeUnit.HOURS) // Every how often we should check again?
+    .start();
+```
 ## License
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
