@@ -102,7 +102,11 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
       Cancellable scheduleCancellable =
           new ExecutorFutureScheduler(executorService)
               .schedule(
-                  () -> upToDateChecker.checkUpToDate(request, callback),
+                  () -> {
+                    // Reset UpToDateChecker state
+                    upToDateChecker.clear();
+                    return upToDateChecker.checkUpToDate(request, callback);
+                  },
           period, timeUnit);
       cancellableBuilder.add(scheduleCancellable);
     } else {
