@@ -9,9 +9,12 @@ The easiest way to check if something is up-to-date, in this example a spigot re
 public class ExampleClass  {
   
   public static void main(String[] args) {
-    UpToDateChecker upToDateChecker = UpToDateChecker.of(
-        MoreExecutors.directExecutor(), UrlBytesReader.defaultInstance(),
-        UpToDateCheckerHelper.EQUAL_STRATEGY, Optional.empty());
+    UpToDateChecker upToDateChecker = 
+        UpToDateChecker.of(
+            MoreExecutors.newDirectExecutorService(),
+            UrlBytesReader.defaultInstance(), 
+            UpToDateCheckerHelper.EQUAL_STRATEGY,
+            Optional.empty());
     
     // Create the request to check if the resource is up-to-date
     ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
