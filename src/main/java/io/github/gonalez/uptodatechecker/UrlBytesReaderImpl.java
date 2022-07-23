@@ -25,7 +25,6 @@ import java.net.URL;
 /**
  * A basic, default implementation of {@link UrlBytesReader}.
  */
-@SuppressWarnings("UnstableApiUsage")
 public final class UrlBytesReaderImpl implements UrlBytesReader {
   public static final UrlBytesReader INSTANCE = new UrlBytesReaderImpl();
   
