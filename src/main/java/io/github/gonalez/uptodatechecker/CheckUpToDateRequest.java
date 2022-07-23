@@ -24,6 +24,11 @@ public interface CheckUpToDateRequest {
     return new Builder.DefaultCheckUpToDateRequestBuilder();
   }
   
+  /** @return a new {@link CheckUpToDateRequest} from the given urlToCheck and version. */
+  static CheckUpToDateRequest of(String urlToCheck, String version) {
+    return newBuilder().setUrlToCheck(urlToCheck).setVersion(version).build();
+  }
+  
   String urlToCheck();
   String version();
   

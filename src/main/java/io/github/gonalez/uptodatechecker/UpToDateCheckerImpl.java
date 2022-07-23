@@ -85,21 +85,19 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                 () -> {
                   // We create the string based off the read url-bytes from the given request {@code urlToCheck}
                   String urlContentToString = UpToDateCheckerHelper.urlContentToString(urlBytesReader, request.urlToCheck());
-                  // Determine if the version is up-to-date or not applying the function {@code versionMatchStrategy}
-                  // using the request version against the parsed, url string
-                  boolean matches = versionMatchStrategy.apply(request.version(), urlContentToString);
-                  
-                  ListenableFuture<CheckUpToDateResponse> future = Futures.immediateFuture(
-                      CheckUpToDateResponse.newBuilder()
-                          .setData(urlContentToString)
-                          .setIsUpToDate(matches)
-                          .build());
+                  ListenableFuture<CheckUpToDateResponse> future =
+                      Futures.immediateFuture(
+                          CheckUpToDateResponse.of(
+                              urlContentToString,
+                              // Determine if the version is up-to-date or not by applying the function {@code versionMatchStrategy}
+                              // to the request version and the parsed, url string {@code urlContentToString}
+                              versionMatchStrategy.apply(request.version(), urlContentToString)));
                   if (requestCallback != null) {
                     Futures.addCallback(future, new FutureCallback<CheckUpToDateResponse>() {
                       @Override
                       public void onSuccess(CheckUpToDateResponse result) {
                         requestCallback.onSuccess(result);
-                        if (matches) {
+                        if (result.isUpToDate()) {
                           requestCallback.onUpToDate(result);
                         } else {
                           requestCallback.onNotUpToDate(result);

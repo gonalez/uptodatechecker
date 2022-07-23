@@ -24,6 +24,11 @@ public interface CheckUpToDateResponse {
     return new Builder.DefaultCheckUpToDateResponseBuilder();
   }
   
+  /** @return a new {@link CheckUpToDateRequest} from the given data and isUpToDate. */
+  static CheckUpToDateResponse of(String data, boolean isUpToDate) {
+    return newBuilder().setData(data).setIsUpToDate(isUpToDate).build();
+  }
+  
   String data();
   boolean isUpToDate();
   
