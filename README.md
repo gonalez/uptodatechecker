@@ -6,7 +6,7 @@ UpToDateChecker is a small and basic library for checking if something is up-to-
 The easiest way to check if something is up-to-date, in this example a spigot resource:
 
 ```java
-public class ExampleClass  {
+public class ExampleClass {
   
   public static void main(String[] args) {
     UpToDateChecker upToDateChecker = 
@@ -22,7 +22,8 @@ public class ExampleClass  {
             CheckUpToDateRequest.newBuilder()
                 .setUrlToCheck(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
                 .setVersion(/*versionToMatch*/)
-                .build(), new UpToDateChecker.Callback() {
+                .build(),
+            new UpToDateChecker.Callback() {
               @Override
               public void onUpToDate(CheckUpToDateResponse response) {
                 // called if the version is up-to-date
