@@ -22,12 +22,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.function.BiFunction;
 
 /**
@@ -51,18 +49,18 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   private final ConcurrentHashMap<String, ListenableFuture<CheckUpToDateResponse>> futuresCache = new ConcurrentHashMap<>();
   
   public UpToDateCheckerImpl(
-      ExecutorService executorService,
+      ListeningExecutorService executorService,
       UrlBytesReader urlBytesReader,
       BiFunction<String, String, Boolean> versionMatchStrategy) {
     this(executorService, urlBytesReader, versionMatchStrategy, Optional.empty());
   }
   
   public UpToDateCheckerImpl(
-      ExecutorService executorService,
+      ListeningExecutorService executorService,
       UrlBytesReader urlBytesReader,
       BiFunction<String, String, Boolean> versionMatchStrategy,
       Optional<UpToDateChecker.Callback> optionalCallback) {
-    this.executorService = MoreExecutors.listeningDecorator(executorService);
+    this.executorService = checkNotNull(executorService);
     this.urlBytesReader = checkNotNull(urlBytesReader);
     this.versionMatchStrategy = checkNotNull(versionMatchStrategy);
     this.optionalCallback = checkNotNull(optionalCallback);
@@ -78,7 +76,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
     }
     ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
         executorService.submit(() -> {
-          String urlContentToString = UpToDateCheckerHelper.urlContentToString(urlBytesReader, request.urlToCheck());
+          String urlContentToString = new String(UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.urlToCheck()));
           CheckUpToDateResponse response =
               CheckUpToDateResponse.of(
                   urlContentToString,

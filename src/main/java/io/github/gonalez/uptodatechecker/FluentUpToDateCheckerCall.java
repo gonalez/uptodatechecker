@@ -15,6 +15,9 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -30,7 +33,12 @@ public interface FluentUpToDateCheckerCall {
   FluentUpToDateCheckerCall setShutdownOnCancel(boolean shutdownOnCancel);
   
   /** Set the executor which will manage the up-to-date checker. */
-  FluentUpToDateCheckerCall withExecutorService(ExecutorService executorService);
+  FluentUpToDateCheckerCall withExecutorService(ListeningExecutorService executorService);
+  
+  /** Set the executor which will manage the up-to-date checker. */
+  default FluentUpToDateCheckerCall withExecutorService(ExecutorService executorService) {
+    return withExecutorService(MoreExecutors.listeningDecorator(executorService));
+  }
   
   /** Set the callback to be executed when the up-to-date checker call has been completed. */
   FluentUpToDateCheckerCall withCallback(UpToDateChecker.Callback callback);
@@ -46,6 +54,12 @@ public interface FluentUpToDateCheckerCall {
   
   /** Establishes that the call must repeat every {@code period} defined by the {@code timeUnit}. */
   FluentUpToDateCheckerCall scheduling(long period, TimeUnit timeUnit);
+  
+  /**
+   * Set the request to be used to download a new update when the call response is not
+   * {@link UpToDateChecker.Callback#onNotUpToDate(CheckUpToDateResponse) not up-to-date}
+   */
+  FluentUpToDateCheckerCall setDownloadRequest(UpdateDownloaderRequest updateDownloaderRequest);
   
   /**
    * Starts the up-to-date check call.

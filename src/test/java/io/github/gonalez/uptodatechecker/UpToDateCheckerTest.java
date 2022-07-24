@@ -18,25 +18,28 @@ package io.github.gonalez.uptodatechecker;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /** Tests for {@link UpToDateChecker}. */
 public class UpToDateCheckerTest {
   // ZNPCs resource id
   private static final String RESOURCE_ID = "80940";
+
+  static UpToDateChecker upToDateChecker;
   
-  private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
-  
-  private final UpToDateChecker upToDateChecker =
-      new UpToDateCheckerImpl(
-          EXECUTOR_SERVICE,
-          UrlBytesReader.defaultInstance(),
-          UpToDateCheckerHelper.EQUAL_STRATEGY);
+  @BeforeAll
+  static void setup() throws Exception {
+    upToDateChecker =
+        new UpToDateCheckerImpl(
+            MoreExecutors.newDirectExecutorService(),
+            UrlBytesReader.defaultInstance(),
+            UpToDateCheckerHelper.EQUAL_STRATEGY);
+  }
   
   @Test
   public void testInvalidUrlCheckUpToDate() throws Exception {

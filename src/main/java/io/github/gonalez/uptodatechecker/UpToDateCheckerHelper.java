@@ -27,8 +27,8 @@ import java.util.function.BiFunction;
 public final class UpToDateCheckerHelper {
   public static final BiFunction<String, String, Boolean> EQUAL_STRATEGY = String::equals;
   
-  /** Converts the given url content into a string or throws an {@link UpToDateCheckerException} if fails. */
-  public static String urlContentToString(
+  /** Converts the given url content into a byte array or throws an {@link UpToDateCheckerException} if fails. */
+  public static byte[] urlContentToBytes(
       UrlBytesReader urlBytesReader, String url) throws UpToDateCheckerException {
     URL maybeCreateUrl;
     try {
@@ -42,7 +42,7 @@ public final class UpToDateCheckerHelper {
     } catch (IOException e) {
       throw UpToDateCheckerExceptionCode.FAIL_TO_READ_URL_BYTES_CODE.toException();
     }
-    return new String(readUrlBytes);
+    return readUrlBytes;
   }
   
   /** Returns an immediate, {@code ListenableFuture} whose value is null. */

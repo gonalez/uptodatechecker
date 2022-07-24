@@ -18,6 +18,7 @@ package io.github.gonalez.uptodatechecker;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -87,7 +88,7 @@ public interface UpToDateChecker {
   
   /** Creates a new {@link UpToDateChecker} based on the given specifications. */
   static UpToDateChecker of(
-      ExecutorService executorService, UrlBytesReader urlBytesReader,
+      ListeningExecutorService executorService, UrlBytesReader urlBytesReader,
       BiFunction<String, String, Boolean> matchStrategy, Optional<Callback> optionalCallback) {
     return new UpToDateCheckerImpl(
         executorService,

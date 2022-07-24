@@ -11,7 +11,7 @@ public class ExampleClass {
   public static void main(String[] args) {
     UpToDateChecker upToDateChecker = 
         UpToDateChecker.of(
-            MoreExecutors.newDirectExecutorService(),
+            /*sync*/MoreExecutors.newDirectExecutorService(),
             UrlBytesReader.defaultInstance(), 
             UpToDateCheckerHelper.EQUAL_STRATEGY,
             Optional.empty());
@@ -48,8 +48,6 @@ Cancellable cancellable =
             .setVersion(/*versionToMatch*/)
             .build())
         .setShutdownOnCancel(true)
-        .withExecutorService(Executors.newSingleThreadExecutor())
-        .withMatchingStrategy(UpToDateCheckerHelper.EQUAL_STRATEGY)
         .scheduling(12, TimeUnit.HOURS) // Every how often we should check again?
     .start();
 ```
