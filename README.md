@@ -1,9 +1,9 @@
 UpToDateChecker
 ============================
-UpToDateChecker is a small and basic library for checking if something is up-to-date or not, based on a request containing an url and a version.
+UpToDateChecker is a small and basic library for checking if something is up-to-date or not.
 
-## Examples
-The easiest way to check if something is up-to-date, in this example a spigot resource:
+## Example
+Here's a short example that shows how to check if a spigot resource is up-to-date or not.
 
 ```java
 public class ExampleClass {
@@ -37,9 +37,8 @@ public class ExampleClass {
   }
 }
 ```
-Fluent Builder Call API
------------------------
-A builder to make calls (requests) to an UpToDateChecker easier. An example on how to use:
+### Fluent Builder Calls API
+A builder to make calls (requests) to an UpToDateChecker easier.
 ```java
 Cancellable cancellable =
     FluentUpToDateCheckerCall.newCall(
