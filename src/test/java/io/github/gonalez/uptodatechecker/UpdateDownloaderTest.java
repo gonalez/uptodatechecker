@@ -24,6 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Optional;
 
 /** Tests for {@link UpdateDownloader}. */
 public class UpdateDownloaderTest {
@@ -47,11 +48,12 @@ public class UpdateDownloaderTest {
     updateDownloader.downloadUpdate(
         UpdateDownloaderRequest.newBuilder()
             .setUrlToDownload(DOWNLOAD_FILE_URL)
-            .setDownloadPath(temporaryDirectory, "test.jar")
+            .setDownloadPath(temporaryDirectory, "test-{new_version}.jar")
+            .setOptionalNewVersion(Optional.of("2.5"))
             .build())
         .get();
     for (File file : temporaryDirectory.toFile().listFiles()) {
-      assertEquals("test.jar", file.getName());
+      assertEquals("test-2.5.jar", file.getName());
     }
   }
 }

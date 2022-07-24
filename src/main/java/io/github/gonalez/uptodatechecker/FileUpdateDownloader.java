@@ -28,6 +28,8 @@ import java.io.FileOutputStream;
 /** A {@link UpdateDownloader} which can download update files to a path. */
 @SuppressWarnings("UnstableApiUsage")
 public class FileUpdateDownloader implements UpdateDownloader {
+  private static final String NEW_VERSION_PLACEHOLDER = "{new_version}";
+  
   private final ListeningExecutorService executor;
   private final UrlBytesReader urlBytesReader;
   
@@ -40,10 +42,11 @@ public class FileUpdateDownloader implements UpdateDownloader {
   
   @Override
   public ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
+    String toDownloadOutputPath = request.downloadPath().replace(NEW_VERSION_PLACEHOLDER, request.newVersion().orElse(""));
     return Futures.catchingAsync(
         executor.submit(() -> {
           byte[] readUrlBytes = UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.urlToDownload());
-          try (FileOutputStream outputStream = new FileOutputStream(request.downloadPath())) {
+          try (FileOutputStream outputStream = new FileOutputStream(toDownloadOutputPath)) {
             ByteStreams.copy(new ByteArrayInputStream(readUrlBytes), outputStream);
           }
           return true;

@@ -118,7 +118,12 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
       callbackBuilder.add(new UpToDateChecker.Callback() {
         @Override
         public void onNotUpToDate(CheckUpToDateResponse response) {
-          updateDownloader.downloadUpdate(updateDownloaderRequest);
+          updateDownloader.downloadUpdate(
+              UpdateDownloaderRequest.newBuilder()
+                  .setDownloadPath(updateDownloaderRequest.downloadPath())
+                  .setUrlToDownload(updateDownloaderRequest.urlToDownload())
+                  .setOptionalNewVersion(Optional.of(response.data()))
+                  .build());
         }
       });
     }

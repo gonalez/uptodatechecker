@@ -15,10 +15,11 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.nio.file.Path;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Optional;
 
 /** The request to download a file. */
 public interface UpdateDownloaderRequest {
@@ -29,10 +30,13 @@ public interface UpdateDownloaderRequest {
   String urlToDownload();
   String downloadPath();
   
+  Optional<String> newVersion();
+  
   /** Builder to create {@link UpdateDownloaderRequest}s. */
   interface Builder {
     Builder setUrlToDownload(String urlToDownload);
     Builder setDownloadPath(String downloadPath);
+    Builder setOptionalNewVersion(Optional<String> newVersion);
   
     default Builder setDownloadPath(Path path, String fileName) {
       return setDownloadPath(path.toString() + "/" + fileName);
@@ -46,6 +50,7 @@ public interface UpdateDownloaderRequest {
     
     final class DefaultUpdateDownloaderRequest implements Builder {
       private String urlToDownload, downloadPath;
+      private Optional<String> newVersion = Optional.empty();
       
       @Override
       public Builder setUrlToDownload(String urlToDownload) {
@@ -60,9 +65,16 @@ public interface UpdateDownloaderRequest {
       }
   
       @Override
+      public Builder setOptionalNewVersion(Optional<String> newVersion) {
+        this.newVersion = newVersion;
+        return this;
+      }
+  
+      @Override
       public UpdateDownloaderRequest build() {
         checkNotNull(urlToDownload);
         checkNotNull(downloadPath);
+        checkNotNull(newVersion);
         return new UpdateDownloaderRequest() {
           @Override
           public String urlToDownload() {
@@ -72,6 +84,11 @@ public interface UpdateDownloaderRequest {
           @Override
           public String downloadPath() {
             return downloadPath;
+          }
+  
+          @Override
+          public Optional<String> newVersion() {
+            return newVersion;
           }
         };
       }
