@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * A basic implementation of {@link FutureScheduler} using a {@code ExecutorService}.
  *
- * <p>We use {@link RetryingCallable} for {@link #schedule(Callable, long, TimeUnit) scheduling}.
+ * <p>We use {@link RepeatingCallable} for {@link #schedule(Callable, long, TimeUnit) scheduling}.
  */
 public class ExecutorFutureScheduler implements FutureScheduler {
   private final ExecutorService executor;
@@ -35,8 +35,8 @@ public class ExecutorFutureScheduler implements FutureScheduler {
   
   @Override
   public <V> Cancellable schedule(Callable<V> callable, long period, TimeUnit timeUnit) {
-    RetryingCallable<V> retryingCallable = new RetryingCallable<>(callable, period, timeUnit);
-    executor.submit(retryingCallable);
-    return retryingCallable;
+    RepeatingCallable<V> repeatingCallable = new RepeatingCallable<>(callable, period, timeUnit);
+    executor.submit(repeatingCallable);
+    return repeatingCallable;
   }
 }

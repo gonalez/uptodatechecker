@@ -20,20 +20,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A {@link Callable} which can be retried multiple times until is {@link Cancellable#cancel() cancelled},
- * this implementation is synchronous.
+ * A {@link Callable} which can be repeated multiple times until is
+ * {@link Cancellable#cancel() cancelled}, this implementation is synchronous.
  *
- * <p>{@code callable} is the default callable to be called on each retry, we wait {@code period} using the
- * {@code timeUnit} to go for the next retry.
+ * <p>{@code callable} is the default callable to be called on each repetition,
+ * we wait {@code period} using the {@code timeUnit} to go for the next repetition.
  */
-final class RetryingCallable<V> implements Callable<V>, Cancellable {
+final class RepeatingCallable<V> implements Callable<V>, Cancellable {
   private final Callable<V> callable;
   private final long period;
   private final TimeUnit timeUnit;
   
   private final AtomicBoolean cancelled = new AtomicBoolean(false);
   
-  public RetryingCallable(
+  public RepeatingCallable(
       Callable<V> callable,
       long period,
       TimeUnit timeUnit) {
