@@ -114,17 +114,13 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
     ImmutableList.Builder<Cancellable> cancellableBuilder = ImmutableList.builder();
     ImmutableList.Builder<UpToDateChecker.Callback> callbackBuilder = ImmutableList.builder();
     if (updateDownloaderRequest != null) {
-      try {
-        UpdateDownloader updateDownloader = new FileUpdateDownloader(executorService, urlBytesReader);
-        callbackBuilder.add(new UpToDateChecker.Callback() {
-          @Override
-          public void onNotUpToDate(CheckUpToDateResponse response) {
-            updateDownloader.downloadUpdate(updateDownloaderRequest);
-          }
-        });
-      } catch (Exception ignored) {
-        // just ignore it
-      }
+      UpdateDownloader updateDownloader = new FileUpdateDownloader(executorService, urlBytesReader);
+      callbackBuilder.add(new UpToDateChecker.Callback() {
+        @Override
+        public void onNotUpToDate(CheckUpToDateResponse response) {
+          updateDownloader.downloadUpdate(updateDownloaderRequest);
+        }
+      });
     }
     if (callback != null) {
       callbackBuilder.add(callback);
