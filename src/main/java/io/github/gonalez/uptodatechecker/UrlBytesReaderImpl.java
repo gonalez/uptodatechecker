@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-/**
- * A basic, default implementation of {@link UrlBytesReader}.
- */
+/** A basic, default implementation for {@link UrlBytesReader}. */
 public final class UrlBytesReaderImpl implements UrlBytesReader {
   public static final UrlBytesReader INSTANCE = new UrlBytesReaderImpl();
   
