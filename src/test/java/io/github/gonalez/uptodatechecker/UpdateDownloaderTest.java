@@ -28,7 +28,6 @@ import java.util.Optional;
 
 /** Tests for {@link UpdateDownloader}. */
 public class UpdateDownloaderTest {
-  private static final String DOWNLOAD_FILE_URL = "https://www.gstatic.com/suggest-dev/odws1_empty.jar";
   
   @TempDir
   static Path temporaryDirectory;
@@ -47,7 +46,7 @@ public class UpdateDownloaderTest {
   public void testFileUpdateDownloader() throws Exception {
     updateDownloader.downloadUpdate(
         UpdateDownloaderRequest.newBuilder()
-            .setUrlToDownload(DOWNLOAD_FILE_URL)
+            .setUrlToDownload(ApiUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(UpToDateCheckerTest.RESOURCE_ID))
             .setDownloadPath(temporaryDirectory, "test-{new_version}.jar")
             .setOptionalNewVersion(Optional.of("2.5"))
             .build())

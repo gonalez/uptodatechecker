@@ -17,6 +17,8 @@ package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Optional;
+
 /** Request to check for up-to-date an url. */
 public interface CheckUpToDateRequest {
   /** Creates a new builder to create a {@link CheckUpToDateRequest}. */
@@ -24,50 +26,70 @@ public interface CheckUpToDateRequest {
     return new Builder.DefaultCheckUpToDateRequestBuilder();
   }
   
-  /** @return a new {@link CheckUpToDateRequest} from the given urlToCheck and version. */
-  static CheckUpToDateRequest of(String urlToCheck, String version) {
-    return newBuilder().setUrlToCheck(urlToCheck).setVersion(version).build();
+  /** @return a new {@link CheckUpToDateRequest} from the given apiUrl and version. */
+  static CheckUpToDateRequest of(String apiUrl, String currentVersion) {
+    return newBuilder()
+        .setApiUrl(apiUrl)
+        .setCurrentVersion(currentVersion)
+        .build();
   }
   
-  String urlToCheck();
-  String version();
+  String apiUrl();
+  String currentVersion();
+  
+  Optional<VersionExtractor> versionExtractor();
   
   /** Builder for {@link CheckUpToDateRequest}. */
   interface Builder {
-    Builder setUrlToCheck(String url);
-    Builder setVersion(String version);
-    
+    Builder setApiUrl(String url);
+    Builder setCurrentVersion(String currentVersion);
+    Builder setVersionExtractor(Optional<VersionExtractor> versionExtractor);
+  
     /** @return a new {@link CheckUpToDateRequest} based from this builder. */
     CheckUpToDateRequest build();
     
     final class DefaultCheckUpToDateRequestBuilder implements Builder {
-      private String urlToCheck, version;
+      private String apiUrl;
+      private String currentVersion;
+      private Optional<VersionExtractor> versionExtractor = Optional.empty();
   
       @Override
-      public Builder setUrlToCheck(String urlToCheck) {
-        this.urlToCheck = urlToCheck;
+      public Builder setApiUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
         return this;
       }
   
       @Override
-      public Builder setVersion(String version) {
-        this.version = version;
+      public Builder setCurrentVersion(String version) {
+        this.currentVersion = version;
         return this;
       }
-      
+  
+      @Override
+      public Builder setVersionExtractor(Optional<VersionExtractor> versionExtractor) {
+        this.versionExtractor = versionExtractor;
+        return this;
+      }
+  
       @Override
       public CheckUpToDateRequest build() {
-        checkNotNull(urlToCheck);
-        checkNotNull(version);
+        checkNotNull(apiUrl);
+        checkNotNull(currentVersion);
+        checkNotNull(versionExtractor);
         return new CheckUpToDateRequest() {
           @Override
-          public String urlToCheck() {
-            return urlToCheck;
+          public String apiUrl() {
+            return apiUrl;
           }
   
           @Override
-          public String version() {
-            return version;
+          public String currentVersion() {
+            return currentVersion;
+          }
+  
+          @Override
+          public Optional<VersionExtractor> versionExtractor() {
+            return versionExtractor;
           }
         };
       }

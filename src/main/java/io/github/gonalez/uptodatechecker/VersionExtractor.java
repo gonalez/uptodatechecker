@@ -17,22 +17,20 @@ package io.github.gonalez.uptodatechecker;
 
 import java.util.function.Function;
 
-/** Common api urls to be used for convenience when building a {@link CheckUpToDateRequest}. */
-// setUrlToCheck(ApiUrls.SPIGOT_API_URL.apply("80940"))
-public enum ApiUrls implements Function<String, String> {
-  // Version checking APIs
-  SPIGOT_API_URL("https://api.spigotmc.org/legacy/update.php?resource=%s"),
-  // File downloading APIs
-  SPIGET_DOWNLOAD_UPDATE_FILE_URL("https://api.spiget.org/v2/resources/%s/download");
+/** Responsible for extracting a valid and readable version for a given string. */
+// TODO: Explain better the docs of this.
+@FunctionalInterface
+public interface VersionExtractor {
+  /**
+   * A {@link VersionExtractor} which does nothing more than return the given passed,
+   * string when calling {@link #extractVersion(String)}.
+   */
+  VersionExtractor NO_OP = content -> content;
   
-  final String apiUrl;
-  
-  private ApiUrls(String apiUrl) {
-    this.apiUrl = apiUrl;
+  static VersionExtractor of(Function<String, String> function) {
+    return function::apply;
   }
   
-  @Override
-  public String apply(String s) {
-    return String.format(apiUrl, s);
-  }
+  /** Extracts the version from the given string. */
+  String extractVersion(String urlContent);
 }

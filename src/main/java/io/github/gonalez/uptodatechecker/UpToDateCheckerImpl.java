@@ -30,11 +30,11 @@ import java.util.function.BiFunction;
 
 /**
  * A basic implementation for {@link UpToDateChecker}. Results are cached to memory identified by
- * the {@link CheckUpToDateRequest#urlToCheck()}.
+ * the {@link CheckUpToDateRequest#apiUrl() url}.
  *
  * <p>To determine if something is up-to-date or not, we use the {@code versionMatchStrategy} function, and then
- * we compare it with the given request {@link CheckUpToDateRequest#version()} and the parsed, string content of
- * the request {@link CheckUpToDateRequest#urlToCheck() url}.
+ * we compare it with the given request {@link CheckUpToDateRequest#currentVersion()} and the parsed, string content of
+ * the request {@link CheckUpToDateRequest#apiUrl() url}.
  *
  * <p>{@code optionalCallback} is an optional callback that can be chained with the callback given at
  * {@link #checkUpToDate(CheckUpToDateRequest, Callback)} if non-null, otherwise use just optionalCallback.
@@ -75,33 +75,38 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
       requestCallback = optionalCallback.orElse(callback);
     }
     ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
-        executorService.submit(() -> {
-          String urlContentToString = new String(UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.urlToCheck()));
-          CheckUpToDateResponse response =
-              CheckUpToDateResponse.of(
-                  urlContentToString,
-                  // Determine if the version is up-to-date or not by applying the function {@code versionMatchStrategy}
-                  // to the request version and the parsed, url string {@code urlContentToString}
-                  versionMatchStrategy.apply(request.version(), urlContentToString));
-          if (requestCallback != null) {
-            requestCallback.onSuccess(response);
-            if (response.isUpToDate()) {
-              requestCallback.onUpToDate(response);
-            } else {
-              requestCallback.onNotUpToDate(response);
-            }
-          }
-          return response;
-        });
-    return Futures.catchingAsync(
-        responseListenableFuture,
-        Exception.class,
-        cause -> {
-          if (requestCallback != null) {
-            requestCallback.onError(cause);
-          }
-          return Futures.immediateFailedFuture(cause);
-        }, executorService);
+        Futures.catchingAsync(
+            executorService.submit(() -> {
+              String urlContentToString =
+                  new String(UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.apiUrl()));
+              if (request.versionExtractor().isPresent()) {
+                urlContentToString = request.versionExtractor().get().extractVersion(urlContentToString);
+              }
+              CheckUpToDateResponse response =
+                  CheckUpToDateResponse.of(
+                      urlContentToString,
+                      // Determine if the version is up-to-date or not by applying the function {@code versionMatchStrategy}
+                      // to the request version and the parsed, url string {@code urlContentToString}
+                      versionMatchStrategy.apply(request.currentVersion(), urlContentToString));
+              if (requestCallback != null) {
+                requestCallback.onSuccess(response);
+                if (response.isUpToDate()) {
+                  requestCallback.onUpToDate(response);
+                } else {
+                  requestCallback.onNotUpToDate(response);
+                }
+              }
+              return response;
+            }),
+            Exception.class,
+            cause -> {
+              if (requestCallback != null) {
+                requestCallback.onError(cause);
+              }
+              return Futures.immediateFailedFuture(cause);
+            }, executorService);
+    futuresCache.put(request.apiUrl(), responseListenableFuture);
+    return responseListenableFuture;
   }
   
   @Override

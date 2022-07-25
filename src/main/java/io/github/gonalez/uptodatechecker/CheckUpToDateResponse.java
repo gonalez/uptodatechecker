@@ -25,28 +25,28 @@ public interface CheckUpToDateResponse {
   }
   
   /** @return a new {@link CheckUpToDateRequest} from the given data and isUpToDate. */
-  static CheckUpToDateResponse of(String data, boolean isUpToDate) {
-    return newBuilder().setData(data).setIsUpToDate(isUpToDate).build();
+  static CheckUpToDateResponse of(String version, boolean isUpToDate) {
+    return newBuilder().setVersion(version).setIsUpToDate(isUpToDate).build();
   }
   
-  String data();
+  String version();
   boolean isUpToDate();
   
   /** Builder for {@link CheckUpToDateResponse}. */
   interface Builder {
-    Builder setData(String data);
+    Builder setVersion(String version);
     Builder setIsUpToDate(boolean isUpToDate);
   
     /** @return a new {@link CheckUpToDateResponse} based from this builder. */
     CheckUpToDateResponse build();
     
     final class DefaultCheckUpToDateResponseBuilder implements Builder {
-      private String data;
+      private String version;
       private boolean upToDate;
       
       @Override
-      public Builder setData(String data) {
-        this.data = data;
+      public Builder setVersion(String version) {
+        this.version = version;
         return this;
       }
   
@@ -58,11 +58,11 @@ public interface CheckUpToDateResponse {
   
       @Override
       public CheckUpToDateResponse build() {
-        checkNotNull(data);
+        checkNotNull(version);
         return new CheckUpToDateResponse() {
           @Override
-          public String data() {
-            return data;
+          public String version() {
+            return version;
           }
   
           @Override

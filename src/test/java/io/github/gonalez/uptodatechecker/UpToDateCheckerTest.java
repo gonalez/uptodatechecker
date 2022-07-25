@@ -28,9 +28,9 @@ import java.util.concurrent.ExecutionException;
 /** Tests for {@link UpToDateChecker}. */
 public class UpToDateCheckerTest {
   // ZNPCs resource id
-  private static final String RESOURCE_ID = "80940";
+  static final String RESOURCE_ID = "80940";
 
-  static UpToDateChecker upToDateChecker;
+  private static UpToDateChecker upToDateChecker;
   
   @BeforeAll
   static void setup() throws Exception {
@@ -48,8 +48,8 @@ public class UpToDateCheckerTest {
             ExecutionException.class,
             () -> upToDateChecker.checkUpToDate(
                 CheckUpToDateRequest.newBuilder()
-                    .setUrlToCheck("https://nothing")
-                    .setVersion("")
+                    .setApiUrl("https://nothing")
+                    .setCurrentVersion("")
                     .build(),
             new UpToDateChecker.Callback(){}).get());
     
@@ -69,7 +69,7 @@ public class UpToDateCheckerTest {
   }
   
   private ListenableFuture<Boolean> checkUpToDateMatching(String url, String version) {
-    return checkUpToDateMatching(CheckUpToDateRequest.newBuilder().setUrlToCheck(url).setVersion(version).build());
+    return checkUpToDateMatching(CheckUpToDateRequest.newBuilder().setApiUrl(url).setCurrentVersion(version).build());
   }
   
   private ListenableFuture<Boolean> checkUpToDateMatching(CheckUpToDateRequest checkUpToDateRequest) {

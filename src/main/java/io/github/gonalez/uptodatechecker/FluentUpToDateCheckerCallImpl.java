@@ -21,10 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -122,7 +119,7 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
               UpdateDownloaderRequest.newBuilder()
                   .setDownloadPath(updateDownloaderRequest.downloadPath())
                   .setUrlToDownload(updateDownloaderRequest.urlToDownload())
-                  .setOptionalNewVersion(Optional.of(response.data()))
+                  .setOptionalNewVersion(Optional.of(response.version()))
                   .build());
         }
       });
