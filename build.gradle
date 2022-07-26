@@ -21,7 +21,7 @@ plugins {
 }
 
 group = 'io.github.gonalez.uptodatechecker'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 repositories {
     mavenCentral()
@@ -51,6 +51,7 @@ publishing {
 
             pom {
                 name = 'UpToDateChecker'
+                description = 'An asynchronous library for spigot to check for new resource updates'
                 url = 'https://github.com/gonalez/uptodatechecker'
 
                 licenses {

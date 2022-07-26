@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.gonalez.uptodatechecker:uptodatechecker:+'
+    implementation 'io.github.gonalez.uptodatechecker:uptodatechecker:0.0.1'
 }
 ```
 ### Maven
@@ -19,7 +19,7 @@ dependencies {
 <dependency>
    <groupId>io.github.gonalez.uptodatechecker</groupId>
    <artifactId>uptodatechecker</artifactId>
-   <version>LATEST</version>
+   <version>0.0.1</version>
 </dependency>
 ```
 
