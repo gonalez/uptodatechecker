@@ -41,8 +41,8 @@ public class ExampleClass {
     ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
         upToDateChecker.checkUpToDate(
             CheckUpToDateRequest.newBuilder()
-                .setUrlToCheck(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
-                .setVersion(/*versionToMatch*/)
+                .setApiUrl(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
+                .setCurrentVersion(/*versionToMatch*/)
                 .build(),
             new UpToDateChecker.Callback() {
               @Override
@@ -64,8 +64,8 @@ A builder to make calls (requests) to an UpToDateChecker easier.
 Cancellable cancellable =
     FluentUpToDateCheckerCall.newCall(
         CheckUpToDateRequest.newBuilder()
-            .setUrlToCheck(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
-            .setVersion(/*versionToMatch*/)
+            .setApiUrl(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
+            .setCurrentVersion(/*versionToMatch*/)
             .build())
         .setShutdownOnCancel(true)
         .scheduling(12, TimeUnit.HOURS) // Every how often we should check again?
