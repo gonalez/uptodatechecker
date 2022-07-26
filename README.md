@@ -2,6 +2,27 @@ UpToDateChecker
 ============================
 UpToDateChecker is a small and basic library for checking if something is up-to-date or not.
 
+## Include in your build
+### Gradle
+```gradle
+repositories {
+    // ...
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.github.gonalez.uptodatechecker:uptodatechecker:+'
+}
+```
+### Maven
+```xml
+<dependency>
+   <groupId>io.github.gonalez.uptodatechecker</groupId>
+   <artifactId>uptodatechecker</artifactId>
+   <version>LATEST</version>
+</dependency>
+```
+
 ## Example
 Here's a short example that shows how to check if a spigot resource is up-to-date or not.
 
