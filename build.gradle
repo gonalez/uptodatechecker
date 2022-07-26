@@ -21,7 +21,7 @@ plugins {
 }
 
 group = 'io.github.gonalez.uptodatechecker'
-version = '0.1-SNAPSHOT'
+version = '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
