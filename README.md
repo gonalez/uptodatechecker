@@ -1,4 +1,4 @@
-UpToDateChecker
+UpToDateChecker ![build](https://github.com/gonalez/uptodatechecker/workflows/build/badge.svg)
 ============================
 UpToDateChecker is a small and basic library for checking if something is up-to-date or not.
 
