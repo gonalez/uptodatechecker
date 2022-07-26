@@ -1,4 +1,4 @@
-UpToDateChecker ![build](https://github.com/gonalez/uptodatechecker/workflows/build/badge.svg)
+UpToDateChecker ![build](https://github.com/gonalez/uptodatechecker/workflows/build/badge.svg) ![release](https://img.shields.io/github/release/gonalez/uptodatechecker.svg) ![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 ============================
 UpToDateChecker is a small and basic library for checking if something is up-to-date or not.
 
