@@ -15,10 +15,10 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import java.util.concurrent.Future;
+import com.google.common.util.concurrent.ListenableFuture;
 
 /** Responsible for downloading new UpToDateChecker updates. */
 public interface UpdateDownloader {
   /** @return a future representing if the download succeeds or not. */
-  Future<Boolean> downloadUpdate(UpdateDownloaderRequest request);
+  ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request);
 }

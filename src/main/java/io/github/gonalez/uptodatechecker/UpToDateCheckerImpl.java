@@ -69,7 +69,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   }
   
   @Override
-  public Future<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback) {
+  public ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback) {
     final Callback requestCallback;
     if (optionalCallback.isPresent() && callback != null) {
       requestCallback = Callback.chaining(ImmutableList.of(optionalCallback.get(), callback));
@@ -112,7 +112,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   }
   
   @Override
-  public Future<Void> shutdown() {
+  public ListenableFuture<Void> shutdown() {
     executorService.shutdownNow();
     return immediateNullFuture();
   }

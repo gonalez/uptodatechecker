@@ -19,12 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
-import java.util.concurrent.Future;
 
 /** A {@link UpdateDownloader} which can download update files to a path. */
 @SuppressWarnings("UnstableApiUsage")
@@ -42,7 +42,7 @@ public class FileUpdateDownloader implements UpdateDownloader {
   }
   
   @Override
-  public Future<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
+  public ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
     String toDownloadOutputPath =
         request.downloadPath().replace(NEW_VERSION_PLACEHOLDER, request.newVersion().orElse(""));
     return LegacyFutures.catchingAsync(
