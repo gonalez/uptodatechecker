@@ -22,10 +22,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
 /**
@@ -67,7 +69,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   }
   
   @Override
-  public ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback) {
+  public Future<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback) {
     final Callback requestCallback;
     if (optionalCallback.isPresent() && callback != null) {
       requestCallback = Callback.chaining(ImmutableList.of(optionalCallback.get(), callback));
@@ -75,7 +77,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
       requestCallback = optionalCallback.orElse(callback);
     }
     ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
-        Futures.catchingAsync(
+        LegacyFutures.catchingAsync(
             executorService.submit(() -> {
               String urlContentToString =
                   new String(UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.apiUrl()));
@@ -110,7 +112,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   }
   
   @Override
-  public ListenableFuture<Void> shutdown() {
+  public Future<Void> shutdown() {
     executorService.shutdownNow();
     return immediateNullFuture();
   }

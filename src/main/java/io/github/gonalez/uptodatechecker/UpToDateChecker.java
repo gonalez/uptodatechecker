@@ -17,13 +17,12 @@ package io.github.gonalez.uptodatechecker;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
 /**
@@ -104,10 +103,10 @@ public interface UpToDateChecker {
    * @param callback the optional callback to execute when the future has been completed.
    * @return a future to a {@link CheckUpToDateResponse} representing the result of the given request.
    */
-  ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
+  Future<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
   
   /** Shut down this up-to-date checker, and cancel any active pending {@link #checkUpToDate(CheckUpToDateRequest, Callback) requests}. */
-  ListenableFuture<Void> shutdown();
+  Future<Void> shutdown();
   
   /** Resets the state of this checker. */
   void clear();
