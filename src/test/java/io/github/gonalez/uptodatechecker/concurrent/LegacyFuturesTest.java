@@ -43,7 +43,7 @@ public class LegacyFuturesTest {
   public void testTransformAsync() throws Exception {
     ListenableFuture<String> future =
         LegacyFutures.transformAsync(
-            () -> BAR,
+            Futures.immediateFuture(BAR),
             s -> Futures.immediateFuture(FOO),
             MoreExecutors.directExecutor());
     assertEquals(FOO, future.get());

@@ -15,9 +15,6 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;

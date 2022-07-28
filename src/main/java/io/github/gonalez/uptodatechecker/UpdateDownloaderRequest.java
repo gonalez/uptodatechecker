@@ -31,12 +31,15 @@ public interface UpdateDownloaderRequest {
   String urlToDownload();
   String downloadPath();
   
+  boolean overwriteUpdateIfItExists();
+  
   Optional<String> newVersion();
   
   /** Builder to create {@link UpdateDownloaderRequest}s. */
   interface Builder {
     Builder setUrlToDownload(String urlToDownload);
     Builder setDownloadPath(String downloadPath);
+    Builder setOverwriteUpdateIfItExists(boolean overwriteUpdateIfItExists);
     Builder setOptionalNewVersion(Optional<String> newVersion);
   
     default Builder setDownloadPath(Path path, String fileName) {
@@ -51,6 +54,7 @@ public interface UpdateDownloaderRequest {
     
     final class DefaultUpdateDownloaderRequest implements Builder {
       private String urlToDownload, downloadPath;
+      private boolean overwriteUpdateIfItExists;
       private Optional<String> newVersion = Optional.empty();
       
       @Override
@@ -62,6 +66,12 @@ public interface UpdateDownloaderRequest {
       @Override
       public Builder setDownloadPath(String downloadPath) {
         this.downloadPath = downloadPath;
+        return this;
+      }
+  
+      @Override
+      public Builder setOverwriteUpdateIfItExists(boolean overwriteUpdateIfItExists) {
+        this.overwriteUpdateIfItExists = overwriteUpdateIfItExists;
         return this;
       }
   
@@ -85,6 +95,11 @@ public interface UpdateDownloaderRequest {
           @Override
           public String downloadPath() {
             return downloadPath;
+          }
+  
+          @Override
+          public boolean overwriteUpdateIfItExists() {
+            return overwriteUpdateIfItExists;
           }
   
           @Override

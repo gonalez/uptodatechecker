@@ -15,22 +15,35 @@
  */
 package io.github.gonalez.uptodatechecker.concurrent;
 
+import com.google.common.util.concurrent.AsyncCallable;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 /** Wrapper around {@link Futures} to initially support older versions of Guava's futures. */
+@SuppressWarnings("UnstableApiUsage")
 public final class LegacyFutures {
   
-  public static <V> ListenableFuture<V> submitAsync(Callable<V> callable, Executor executor) {
+  public static <V> ListenableFuture<V> submitAsync(AsyncCallable<V> callable, Executor executor) {
     AwaitingSettableFuture<V> settableFuture = AwaitingSettableFuture.awaiting(executor);
     executor.execute(() -> {
       try {
-        settableFuture.set(callable.call());
+        settableFuture.setFuture(callable.call());
+      } catch (Exception e) {
+        settableFuture.setException(e);
+      }
+    });
+    return settableFuture;
+  }
+  
+  public static <V> ListenableFuture<V> callAsync(AsyncCallable<V> callable, Executor executor) {
+    AwaitingSettableFuture<V> settableFuture = AwaitingSettableFuture.awaiting(executor);
+    executor.execute(() -> {
+      try {
+        settableFuture.setFuture(callable.call());
       } catch (Exception e) {
         settableFuture.setException(e);
       }
@@ -62,9 +75,9 @@ public final class LegacyFutures {
   }
   
   public static <V, T> ListenableFuture<T> transformAsync(
-      Callable<V> callable, Function<V, ListenableFuture<T>> transformFunction, Executor executor) {
+      ListenableFuture<V> future, Function<V, ListenableFuture<T>> transformFunction, Executor executor) {
     AwaitingSettableFuture<T> settableFuture = AwaitingSettableFuture.awaiting(executor);
-    Futures.addCallback(submitAsync(callable, executor), new FutureCallback<>() {
+    Futures.addCallback(submitAsync(returningAsyncFuture(future), executor), new FutureCallback<>() {
       @Override
       public void onSuccess(V result) {
         settableFuture.setFuture(transformFunction.apply(result));
@@ -76,6 +89,11 @@ public final class LegacyFutures {
       }
     });
     return settableFuture;
+  }
+  
+  /** @return a {@code AsyncCallable} which returns the given future. */
+  private static <V> AsyncCallable<V> returningAsyncFuture(ListenableFuture<V> future) {
+    return () -> future;
   }
   
   /** Returns an immediate, {@code ListenableFuture} whose value is null. */

@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 
 /** A {@link UpdateDownloader} which can download update files to a path. */
@@ -43,17 +44,21 @@ public class FileUpdateDownloader implements UpdateDownloader {
   
   @Override
   public ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
-    String toDownloadOutputPath =
-        request.downloadPath().replace(NEW_VERSION_PLACEHOLDER, request.newVersion().orElse(""));
+    String toDownloadOutputPath = request.downloadPath().replace(
+        NEW_VERSION_PLACEHOLDER,request.newVersion().orElse(""));
+    File file = new File(toDownloadOutputPath);
     return LegacyFutures.catchingAsync(
         LegacyFutures.submitAsync(() -> {
-          byte[] urlContentBytes = UpToDateCheckerHelper.urlContentToBytes(
-              urlBytesReader, request.urlToDownload());
-          try (FileOutputStream outputStream = new FileOutputStream(toDownloadOutputPath)) {
+          if (!request.overwriteUpdateIfItExists() && file.exists()) {
+            return Futures.immediateFuture(false);
+          }
+          byte[] urlContentBytes =
+              UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.urlToDownload());
+          try (FileOutputStream outputStream = new FileOutputStream(file)) {
             ByteStreams.copy(new ByteArrayInputStream(urlContentBytes),
                 outputStream);
           }
-          return true;
+          return Futures.immediateFuture(true);
         }, executor),
         Exception.class,
         cause -> {

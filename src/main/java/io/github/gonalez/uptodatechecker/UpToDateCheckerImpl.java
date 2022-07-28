@@ -77,7 +77,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
     }
     ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
         LegacyFutures.catchingAsync(
-            executorService.submit(() -> {
+            LegacyFutures.submitAsync(() -> {
               String urlContentToString =
                   new String(UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.apiUrl()));
               if (request.versionExtractor().isPresent()) {
@@ -97,8 +97,8 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                   requestCallback.onNotUpToDate(response);
                 }
               }
-              return response;
-            }),
+              return Futures.immediateFuture(response);
+            }, executorService),
             Exception.class,
             cause -> {
               if (requestCallback != null) {
