@@ -32,6 +32,7 @@ import java.util.function.BiFunction;
 public interface UpToDateChecker {
   /** Functions to be called when calling {@link #checkUpToDate(CheckUpToDateRequest, Callback)}. */
   interface Callback {
+    /** Chains the specified {@code Callback}s. */
     static Callback chaining(Iterable<Callback> callbacks) {
       return new ChainingUpToDateCheckerCallback(callbacks);
     }
@@ -48,6 +49,7 @@ public interface UpToDateChecker {
     /** Called if any error occurs. */
     default void onError(Throwable throwable) {}
     
+    /** Provides a basic chaining {@link Callback} of an iterable of callbacks. */
     final class ChainingUpToDateCheckerCallback implements Callback {
       private final Iterable<Callback> callbacks;
       
@@ -97,9 +99,9 @@ public interface UpToDateChecker {
   }
   
   /**
-   * Asynchronously checks if the given request is up-to-date based on the request url and version.
+   * Asynchronously checks if the given request is up-to-date or not.
    *
-   * @param request the request.
+   * @param request the request to use for check up-to-date.
    * @param callback the optional callback to execute when the future has been completed.
    * @return a future to a {@link CheckUpToDateResponse} representing the result of the given request.
    */

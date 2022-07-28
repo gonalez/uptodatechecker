@@ -17,7 +17,7 @@ package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/** The response for a {@link CheckUpToDateRequest}. */
+/** Response of {@link CheckUpToDateRequest}. */
 public interface CheckUpToDateResponse {
   /** Creates a new builder to create a {@link CheckUpToDateResponse}. */
   static Builder newBuilder() {

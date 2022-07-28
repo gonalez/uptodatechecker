@@ -21,8 +21,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
 
-/** The request to download a file. */
+/** Request to download a file. */
 public interface UpdateDownloaderRequest {
+  /** Creates a new builder to create a {@link UpdateDownloaderRequest}. */
   static Builder newBuilder() {
     return new Builder.DefaultUpdateDownloaderRequest();
   }

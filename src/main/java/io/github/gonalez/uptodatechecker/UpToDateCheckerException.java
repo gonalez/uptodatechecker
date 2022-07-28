@@ -27,6 +27,7 @@ public class UpToDateCheckerException extends Exception {
     return new Builder();
   }
   
+  /** Creates a {@link UpToDateCheckerException} from the given exception code. */
   public static UpToDateCheckerException ofCode(UpToDateCheckerExceptionCode code) {
     return new UpToDateCheckerException(code);
   }
@@ -56,6 +57,7 @@ public class UpToDateCheckerException extends Exception {
     return Futures.immediateFailedFuture(this);
   }
   
+  /** Builder for {@link UpToDateCheckerException}. */
   public static final class Builder {
     private UpToDateCheckerExceptionCode exceptionCode;
   
@@ -66,6 +68,7 @@ public class UpToDateCheckerException extends Exception {
       return this;
     }
     
+    /** Creates a new {@link UpToDateCheckerException} from this builder. */
     public UpToDateCheckerException build() {
       checkNotNull(exceptionCode);
       return new UpToDateCheckerException(exceptionCode);

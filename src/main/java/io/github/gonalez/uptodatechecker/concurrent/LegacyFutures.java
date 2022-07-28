@@ -78,5 +78,10 @@ public final class LegacyFutures {
     return settableFuture;
   }
   
+  /** Returns an immediate, {@code ListenableFuture} whose value is null. */
+  public static <V> ListenableFuture<V> immediateNullFuture() {
+    return Futures.immediateFuture(null);
+  }
+  
   private LegacyFutures() {}
 }

@@ -45,10 +45,5 @@ public final class UpToDateCheckerHelper {
     return readUrlBytes;
   }
   
-  /** Returns an immediate, {@code ListenableFuture} whose value is null. */
-  public static <V> ListenableFuture<V> immediateNullFuture() {
-    return Futures.immediateFuture(null);
-  }
-  
   private UpToDateCheckerHelper() {}
 }

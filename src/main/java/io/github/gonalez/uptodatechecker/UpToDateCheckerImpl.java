@@ -16,7 +16,7 @@
 package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.github.gonalez.uptodatechecker.UpToDateCheckerHelper.immediateNullFuture;
+import static io.github.gonalez.uptodatechecker.concurrent.LegacyFutures.immediateNullFuture;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
@@ -27,7 +27,6 @@ import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
 /**

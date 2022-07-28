@@ -18,6 +18,7 @@ package io.github.gonalez.uptodatechecker;
 /** Something that can be cancelled. */
 @FunctionalInterface
 public interface Cancellable {
+  /** Chains the specified {@code Cancellable}s. */
   static Cancellable chaining(Iterable<Cancellable> cancellables) {
     return () -> {
       for (Cancellable cancellable : cancellables) {
@@ -26,5 +27,6 @@ public interface Cancellable {
     };
   }
   
+  /** Cancels the action. */
   void cancel();
 }
