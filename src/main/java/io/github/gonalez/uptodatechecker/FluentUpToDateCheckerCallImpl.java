@@ -18,10 +18,10 @@ package io.github.gonalez.uptodatechecker;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -29,7 +29,7 @@ import java.util.function.BiFunction;
 /** Default implementation for {@link FluentUpToDateCheckerCall}. */
 public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall {
   private boolean shutdownOnCancel;
-  private ListeningExecutorService executorService;
+  private ExecutorService executorService;
   private UpToDateChecker.Callback callback, checkerCallback;
   private UrlBytesReader urlBytesReader = UrlBytesReader.defaultInstance();
   private BiFunction<String, String, Boolean> matchStrategy = UpToDateCheckerHelper.EQUAL_STRATEGY;
@@ -52,7 +52,7 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
   }
   
   @Override
-  public FluentUpToDateCheckerCall withExecutorService(ListeningExecutorService executorService) {
+  public FluentUpToDateCheckerCall withExecutorService(ExecutorService executorService) {
     this.executorService = executorService;
     return this;
   }
@@ -144,7 +144,7 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
     }
     cancellableBuilder.add(upToDateChecker::clear);
     if (shutdownOnCancel) {
-      cancellableBuilder.add(upToDateChecker::shutdown);
+      cancellableBuilder.add(() -> executorService.shutdownNow());
     }
     return Cancellable.chaining(cancellableBuilder.build());
   }

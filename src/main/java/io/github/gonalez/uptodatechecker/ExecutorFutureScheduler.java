@@ -18,7 +18,7 @@ package io.github.gonalez.uptodatechecker;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,16 +28,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>We use {@link RepeatingCallable} for {@link #schedule(Callable, long, TimeUnit) scheduling}.
  */
 public class ExecutorFutureScheduler implements FutureScheduler {
-  private final ExecutorService executor;
+  private final Executor executor;
   
-  public ExecutorFutureScheduler(ExecutorService executor) {
+  public ExecutorFutureScheduler(Executor executor) {
     this.executor = checkNotNull(executor);
   }
   
   @Override
   public <V> Cancellable schedule(Callable<V> callable, long period, TimeUnit timeUnit) {
     RepeatingCallable<V> repeatingCallable = new RepeatingCallable<>(callable, period, timeUnit);
-    executor.submit(repeatingCallable);
+    executor.execute(() -> {
+      try {
+        repeatingCallable.call();
+      } catch (Throwable e) {
+        // We failed on the first try, suppress the exception and prevent it from being run again
+        repeatingCallable.cancel();
+      }
+    });
     return repeatingCallable;
   }
   

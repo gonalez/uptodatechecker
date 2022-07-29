@@ -27,6 +27,7 @@ import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
 /**
@@ -42,7 +43,7 @@ import java.util.function.BiFunction;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class UpToDateCheckerImpl implements UpToDateChecker {
-  private final ListeningExecutorService executorService;
+  private final Executor executor;
   private final UrlBytesReader urlBytesReader;
   private final BiFunction<String, String, Boolean> versionMatchStrategy;
   private final Optional<UpToDateChecker.Callback> optionalCallback;
@@ -50,18 +51,18 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   private final ConcurrentHashMap<String, ListenableFuture<CheckUpToDateResponse>> futuresCache = new ConcurrentHashMap<>();
   
   public UpToDateCheckerImpl(
-      ListeningExecutorService executorService,
+      Executor executor,
       UrlBytesReader urlBytesReader,
       BiFunction<String, String, Boolean> versionMatchStrategy) {
-    this(executorService, urlBytesReader, versionMatchStrategy, Optional.empty());
+    this(executor, urlBytesReader, versionMatchStrategy, Optional.empty());
   }
   
   public UpToDateCheckerImpl(
-      ListeningExecutorService executorService,
+      Executor executor,
       UrlBytesReader urlBytesReader,
       BiFunction<String, String, Boolean> versionMatchStrategy,
       Optional<UpToDateChecker.Callback> optionalCallback) {
-    this.executorService = checkNotNull(executorService);
+    this.executor = checkNotNull(executor);
     this.urlBytesReader = checkNotNull(urlBytesReader);
     this.versionMatchStrategy = checkNotNull(versionMatchStrategy);
     this.optionalCallback = checkNotNull(optionalCallback);
@@ -69,6 +70,9 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   
   @Override
   public ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback) {
+    if (futuresCache.containsKey(request.apiUrl())) {
+      return futuresCache.get(request.apiUrl());
+    }
     final Callback requestCallback;
     if (optionalCallback.isPresent() && callback != null) {
       requestCallback = Callback.chaining(ImmutableList.of(optionalCallback.get(), callback));
@@ -98,22 +102,16 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                 }
               }
               return Futures.immediateFuture(response);
-            }, executorService),
+            }, executor),
             Exception.class,
             cause -> {
               if (requestCallback != null) {
                 requestCallback.onError(cause);
               }
               return Futures.immediateFailedFuture(cause);
-            }, executorService);
+            }, executor);
     futuresCache.put(request.apiUrl(), responseListenableFuture);
     return responseListenableFuture;
-  }
-  
-  @Override
-  public ListenableFuture<Void> shutdown() {
-    executorService.shutdownNow();
-    return immediateNullFuture();
   }
   
   @Override

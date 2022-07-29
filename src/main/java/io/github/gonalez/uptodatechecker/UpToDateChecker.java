@@ -106,10 +106,7 @@ public interface UpToDateChecker {
    * @return a future to a {@link CheckUpToDateResponse} representing the result of the given request.
    */
   ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
-  
-  /** Shut down this up-to-date checker, and cancel any active pending {@link #checkUpToDate(CheckUpToDateRequest, Callback) requests}. */
-  ListenableFuture<Void> shutdown();
-  
+
   /** Resets the state of this checker. */
   void clear();
 }

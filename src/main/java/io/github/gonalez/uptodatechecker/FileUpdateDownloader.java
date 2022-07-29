@@ -20,23 +20,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.concurrent.Executor;
 
 /** A {@link UpdateDownloader} which can download update files to a path. */
 @SuppressWarnings("UnstableApiUsage")
 public class FileUpdateDownloader implements UpdateDownloader {
   private static final String NEW_VERSION_PLACEHOLDER = "{new_version}";
   
-  private final ListeningExecutorService executor;
+  private final Executor executor;
   private final UrlBytesReader urlBytesReader;
   
   public FileUpdateDownloader(
-      ListeningExecutorService executor,
+      Executor executor,
       UrlBytesReader urlBytesReader) {
     this.executor = checkNotNull(executor);
     this.urlBytesReader = checkNotNull(urlBytesReader);

@@ -22,7 +22,11 @@ public interface Cancellable {
   static Cancellable chaining(Iterable<Cancellable> cancellables) {
     return () -> {
       for (Cancellable cancellable : cancellables) {
-        cancellable.cancel();
+        try {
+          cancellable.cancel();
+        } catch (Throwable ignored) {
+          // Suppress the exception to allow cancel the other pending {@code cancellables}
+        }
       }
     };
   }
