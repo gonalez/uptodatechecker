@@ -31,7 +31,7 @@ public class LegacyFuturesTest {
   public void testCatchingAsync() throws Exception {
     ListenableFuture<String> future =
         LegacyFutures.catchingAsync(
-            LegacyFutures.submitAsync(() -> {
+            LegacyFutures.callAsync(() -> {
               throw new Exception();
               }, MoreExecutors.directExecutor()),
             Exception.class,

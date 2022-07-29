@@ -48,7 +48,7 @@ public class FileUpdateDownloader implements UpdateDownloader {
         NEW_VERSION_PLACEHOLDER,request.newVersion().orElse(""));
     File file = new File(toDownloadOutputPath);
     return LegacyFutures.catchingAsync(
-        LegacyFutures.submitAsync(() -> {
+        LegacyFutures.callAsync(() -> {
           if (!request.overwriteUpdateIfItExists() && file.exists()) {
             return Futures.immediateFuture(false);
           }

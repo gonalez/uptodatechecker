@@ -27,18 +27,6 @@ import java.util.function.Function;
 @SuppressWarnings("UnstableApiUsage")
 public final class LegacyFutures {
   
-  public static <V> ListenableFuture<V> submitAsync(AsyncCallable<V> callable, Executor executor) {
-    AwaitingSettableFuture<V> settableFuture = AwaitingSettableFuture.awaiting(executor);
-    executor.execute(() -> {
-      try {
-        settableFuture.setFuture(callable.call());
-      } catch (Exception e) {
-        settableFuture.setException(e);
-      }
-    });
-    return settableFuture;
-  }
-  
   public static <V> ListenableFuture<V> callAsync(AsyncCallable<V> callable, Executor executor) {
     AwaitingSettableFuture<V> settableFuture = AwaitingSettableFuture.awaiting(executor);
     executor.execute(() -> {
@@ -77,7 +65,7 @@ public final class LegacyFutures {
   public static <V, T> ListenableFuture<T> transformAsync(
       ListenableFuture<V> future, Function<V, ListenableFuture<T>> transformFunction, Executor executor) {
     AwaitingSettableFuture<T> settableFuture = AwaitingSettableFuture.awaiting(executor);
-    Futures.addCallback(submitAsync(returningAsyncFuture(future), executor), new FutureCallback<>() {
+    Futures.addCallback(callAsync(returningAsyncFuture(future), executor), new FutureCallback<>() {
       @Override
       public void onSuccess(V result) {
         settableFuture.setFuture(transformFunction.apply(result));
