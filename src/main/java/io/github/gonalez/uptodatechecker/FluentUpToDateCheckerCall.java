@@ -15,10 +15,6 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -30,7 +26,10 @@ public interface FluentUpToDateCheckerCall {
     return new FluentUpToDateCheckerCallImpl(request);
   }
   
-  /** Set if we should call shutdown the executor service when cancelling {@link #start()}. */
+  /**
+   * Set if we should shut down the executor service and cancel any pending tasks
+   * when cancelling {@link #start()}.
+   */
   FluentUpToDateCheckerCall setShutdownOnCancel(boolean shutdownOnCancel);
   
   /** Set the executor which will manage the up-to-date checker. */
