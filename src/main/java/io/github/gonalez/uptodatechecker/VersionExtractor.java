@@ -27,6 +27,7 @@ public interface VersionExtractor {
    */
   VersionExtractor NO_OP = content -> content;
   
+  /** Creates a new {@link VersionExtractor} from the given function. */
   static VersionExtractor of(Function<String, String> function) {
     return function::apply;
   }
