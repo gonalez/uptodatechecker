@@ -18,7 +18,9 @@ package io.github.gonalez.uptodatechecker;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
+import io.github.gonalez.uptodatechecker.concurrent.ExecutorFutureScheduler;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -129,7 +131,7 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
     }
     UpToDateChecker.Callback callback1 = UpToDateChecker.Callback.chaining(callbackBuilder.build());
     if (timeUnit != null) {
-      Cancellable scheduleCancellable =
+      ListenableFuture<?> scheduleUpToDateCheckerTask =
           new ExecutorFutureScheduler(executorService)
               .schedule(
                   () -> {
@@ -137,14 +139,15 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
                     upToDateChecker.clear();
                     return upToDateChecker.checkUpToDate(request, callback1);
                   },
-          period, timeUnit);
-      cancellableBuilder.add(scheduleCancellable);
+                  period,
+                  timeUnit);
+      cancellableBuilder.add(() -> scheduleUpToDateCheckerTask.cancel(true));
     } else {
       upToDateChecker.checkUpToDate(request, callback1);
     }
     cancellableBuilder.add(upToDateChecker::clear);
     if (shutdownOnCancel) {
-      cancellableBuilder.add(() -> executorService.shutdownNow());
+      cancellableBuilder.add(executorService::shutdownNow);
     }
     return Cancellable.chaining(cancellableBuilder.build());
   }

@@ -13,17 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.uptodatechecker;
+package io.github.gonalez.uptodatechecker.concurrent;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-/** Responsible for scheduling {@link Callable}s for a fixed period based on a timeunit. */
+/**
+ * Responsible for scheduling {@link Callable}s for a fixed period.
+ *
+ * <p>Implementations must guarantee that the {@link #schedule(Callable, long, TimeUnit) scheduled future}
+ * could be cancelled when calling {@link java.util.concurrent.Future#cancel(boolean)}.
+ */
 public interface FutureScheduler {
   /**
    * Schedules the given callable for the given period and timeunit.
    *
-   * @return a {@link Callable} representing the state of the scheduled callable.
+   * @return a {@link ListenableFuture} representing the current state of the scheduled {@code Callable}.
    */
-  <V> Cancellable schedule(Callable<V> callable, long period, TimeUnit timeUnit);
+  <V> ListenableFuture<V> schedule(Callable<V> callable, long period, TimeUnit timeUnit);
 }
