@@ -35,7 +35,7 @@ public class AwaitingSettableFutureTest {
   public void testAwaitingSuccess() throws Exception {
     AwaitingSettableFuture<String> awaitingDoneFuture = AwaitingSettableFuture.awaiting(MoreExecutors.directExecutor());
     EXECUTOR_SERVICE.submit(awaitingDoneFuture);
-    awaitingDoneFuture.set("foo3");
+    awaitingDoneFuture.set("foo");
   }
   
   @Test
