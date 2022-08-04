@@ -30,8 +30,6 @@ import java.util.concurrent.Executor;
 /** A {@link UpdateDownloader} which can download update files to a path. */
 @SuppressWarnings("UnstableApiUsage")
 public class FileUpdateDownloader implements UpdateDownloader {
-  private static final String NEW_VERSION_PLACEHOLDER = "{new_version}";
-  
   private final Executor executor;
   private final UrlBytesReader urlBytesReader;
   
@@ -45,7 +43,7 @@ public class FileUpdateDownloader implements UpdateDownloader {
   @Override
   public ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
     String toDownloadOutputPath = request.downloadPath().replace(
-        NEW_VERSION_PLACEHOLDER,request.newVersion().orElse(""));
+        Constants.NEW_VERSION_PLACEHOLDER, request.newVersion().orElse(""));
     File file = new File(toDownloadOutputPath);
     return LegacyFutures.catchingAsync(
         LegacyFutures.callAsync(() -> {
