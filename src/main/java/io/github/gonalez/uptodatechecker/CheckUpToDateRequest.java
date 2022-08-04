@@ -26,22 +26,19 @@ public interface CheckUpToDateRequest {
     return new Builder.DefaultCheckUpToDateRequestBuilder();
   }
   
-  /** @return a new {@link CheckUpToDateRequest} from the given apiUrl and version. */
-  static CheckUpToDateRequest of(String apiUrl, String currentVersion) {
-    return newBuilder()
-        .setApiUrl(apiUrl)
-        .setCurrentVersion(currentVersion)
-        .build();
+  /** @return a new {@link CheckUpToDateRequest} from the given url and version. */
+  static CheckUpToDateRequest of(String urlToCheck, String currentVersion) {
+    return newBuilder().setUrlToCheck(urlToCheck).setCurrentVersion(currentVersion).build();
   }
   
-  String apiUrl();
+  String urlToCheck();
   String currentVersion();
   
   Optional<VersionExtractor> versionExtractor();
   
   /** Builder for {@link CheckUpToDateRequest}. */
   interface Builder {
-    Builder setApiUrl(String url);
+    Builder setUrlToCheck(String urlToCheck);
     Builder setCurrentVersion(String currentVersion);
     Builder setVersionExtractor(Optional<VersionExtractor> versionExtractor);
   
@@ -49,13 +46,12 @@ public interface CheckUpToDateRequest {
     CheckUpToDateRequest build();
     
     final class DefaultCheckUpToDateRequestBuilder implements Builder {
-      private String apiUrl;
-      private String currentVersion;
+      private String urlToCheck, currentVersion;
       private Optional<VersionExtractor> versionExtractor = Optional.empty();
   
       @Override
-      public Builder setApiUrl(String apiUrl) {
-        this.apiUrl = apiUrl;
+      public Builder setUrlToCheck(String urlToCheck) {
+        this.urlToCheck = urlToCheck;
         return this;
       }
   
@@ -73,13 +69,13 @@ public interface CheckUpToDateRequest {
   
       @Override
       public CheckUpToDateRequest build() {
-        checkNotNull(apiUrl);
+        checkNotNull(urlToCheck);
         checkNotNull(currentVersion);
         checkNotNull(versionExtractor);
         return new CheckUpToDateRequest() {
           @Override
-          public String apiUrl() {
-            return apiUrl;
+          public String urlToCheck() {
+            return urlToCheck;
           }
   
           @Override

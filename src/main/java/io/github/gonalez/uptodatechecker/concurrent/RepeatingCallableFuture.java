@@ -16,6 +16,7 @@
 package io.github.gonalez.uptodatechecker.concurrent;
 
 import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.AsyncCallable;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -29,8 +30,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>{@code callable} is the callable to be called on each repetition, we
  * wait {@code period} using the {@code timeUnit} to go for the next repetition.
  */
+@SuppressWarnings("UnstableApiUsage")
 final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runnable {
-  private final Callable<V> callable;
+  private final AsyncCallable<V> callable;
   private final long period;
   private final TimeUnit timeUnit;
   private final boolean shouldCancelOnFailure;
@@ -38,7 +40,7 @@ final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runn
   private final AtomicBoolean cancelled = new AtomicBoolean();
 
   public RepeatingCallableFuture(
-      Callable<V> callable, long period, TimeUnit timeUnit, boolean shouldCancelOnFailure) {
+      AsyncCallable<V> callable, long period, TimeUnit timeUnit, boolean shouldCancelOnFailure) {
     this.callable = callable;
     this.period = period;
     this.timeUnit = timeUnit;
@@ -56,8 +58,7 @@ final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runn
         if (isCancelled()) {
           cancel(false); break;
         }
-        V call = callable.call();
-        set(call);
+        setFuture(callable.call());
       } catch (InterruptedException interruptedException) {
         cancel(false);
       } catch (Throwable throwable) {

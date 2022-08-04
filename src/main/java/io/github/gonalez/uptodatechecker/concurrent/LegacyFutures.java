@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /** Wrapper around {@link Futures} to initially support older versions of Guava's futures. */
@@ -77,6 +78,14 @@ public final class LegacyFutures {
       }
     });
     return settableFuture;
+  }
+  
+  public static <V> ListenableFuture<V> schedulePeriodicAsync(
+      AsyncCallable<V> callable, long period, TimeUnit timeUnit, Executor executor) {
+    RepeatingCallableFuture<V> repeatingInterruptedCallable =
+        new RepeatingCallableFuture<>(callable, period, timeUnit, false);
+    executor.execute(repeatingInterruptedCallable);
+    return repeatingInterruptedCallable;
   }
   
   /** @return a {@code AsyncCallable} which returns the given future. */

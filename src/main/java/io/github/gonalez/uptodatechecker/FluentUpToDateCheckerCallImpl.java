@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import io.github.gonalez.uptodatechecker.concurrent.ExecutorFutureScheduler;
+import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -121,7 +121,7 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
               UpdateDownloaderRequest.newBuilder()
                   .setDownloadPath(updateDownloaderRequest.downloadPath())
                   .setUrlToDownload(updateDownloaderRequest.urlToDownload())
-                  .setOptionalNewVersion(Optional.of(response.version()))
+                  .setOptionalNewVersion(Optional.of(response.newVersion()))
                   .build());
         }
       });
@@ -132,15 +132,14 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
     UpToDateChecker.Callback callback1 = UpToDateChecker.Callback.chaining(callbackBuilder.build());
     if (timeUnit != null) {
       ListenableFuture<?> scheduleUpToDateCheckerTask =
-          new ExecutorFutureScheduler(executorService)
-              .schedule(
+          LegacyFutures.schedulePeriodicAsync(
                   () -> {
                     // Reset UpToDateChecker state
                     upToDateChecker.clear();
                     return upToDateChecker.checkUpToDate(request, callback1);
                   },
                   period,
-                  timeUnit);
+                  timeUnit, executorService);
       cancellableBuilder.add(() -> scheduleUpToDateCheckerTask.cancel(true));
     } else {
       upToDateChecker.checkUpToDate(request, callback1);

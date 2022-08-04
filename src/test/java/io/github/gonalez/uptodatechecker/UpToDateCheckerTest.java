@@ -48,7 +48,7 @@ public class UpToDateCheckerTest {
             ExecutionException.class,
             () -> upToDateChecker.checkUpToDate(
                 CheckUpToDateRequest.newBuilder()
-                    .setApiUrl("https://nothing")
+                    .setUrlToCheck("https://nothing")
                     .setCurrentVersion("")
                     .build(),
             new UpToDateChecker.Callback(){}).get());
@@ -69,7 +69,7 @@ public class UpToDateCheckerTest {
   }
   
   private ListenableFuture<Boolean> checkUpToDateMatching(String url, String version) {
-    return checkUpToDateMatching(CheckUpToDateRequest.newBuilder().setApiUrl(url).setCurrentVersion(version).build());
+    return checkUpToDateMatching(CheckUpToDateRequest.newBuilder().setUrlToCheck(url).setCurrentVersion(version).build());
   }
   
   private ListenableFuture<Boolean> checkUpToDateMatching(CheckUpToDateRequest checkUpToDateRequest) {
