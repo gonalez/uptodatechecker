@@ -42,16 +42,10 @@ public class FileUpdateDownloader implements UpdateDownloader {
   
   @Override
   public ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
-    String toDownloadOutputPath = request.downloadPath().replace(
-        Constants.NEW_VERSION_PLACEHOLDER, request.newVersion().orElse(""));
-    File file = new File(toDownloadOutputPath);
+    File file = new File(request.downloadPath());
     return LegacyFutures.catchingAsync(
         LegacyFutures.callAsync(() -> {
-          if (!request.overwriteUpdateIfItExists() && file.exists()) {
-            return Futures.immediateFuture(false);
-          }
-          byte[] urlContentBytes =
-              UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.urlToDownload());
+          byte[] urlContentBytes = UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.urlToDownload());
           try (FileOutputStream outputStream = new FileOutputStream(file)) {
             ByteStreams.copy(new ByteArrayInputStream(urlContentBytes),
                 outputStream);

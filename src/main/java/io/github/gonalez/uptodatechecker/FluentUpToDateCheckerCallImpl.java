@@ -121,7 +121,6 @@ public class FluentUpToDateCheckerCallImpl implements FluentUpToDateCheckerCall 
               UpdateDownloaderRequest.newBuilder()
                   .setDownloadPath(updateDownloaderRequest.downloadPath())
                   .setUrlToDownload(updateDownloaderRequest.urlToDownload())
-                  .setOptionalNewVersion(Optional.of(response.newVersion()))
                   .build());
         }
       });

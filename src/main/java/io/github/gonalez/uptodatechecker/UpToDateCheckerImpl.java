@@ -16,12 +16,10 @@
 package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.github.gonalez.uptodatechecker.concurrent.LegacyFutures.immediateNullFuture;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import javax.annotation.Nullable;
@@ -87,11 +85,12 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                 urlContentToString = request.versionExtractor().get().extractVersion(urlContentToString);
               }
               CheckUpToDateResponse response =
-                  CheckUpToDateResponse.of(
-                      urlContentToString,
+                  CheckUpToDateResponse.newBuilder()
+                      .setNewVersion(urlContentToString)
                       // Determine if the version is up-to-date or not by applying the function {@code versionMatchStrategy}
                       // to the request version and the parsed, url string {@code urlContentToString}
-                      versionMatchStrategy.apply(request.currentVersion(), urlContentToString));
+                      .setIsUpToDate(versionMatchStrategy.apply(request.currentVersion(), urlContentToString))
+                      .build();
               if (requestCallback != null) {
                 requestCallback.onSuccess(response);
                 if (response.isUpToDate()) {

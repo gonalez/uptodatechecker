@@ -15,99 +15,40 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.auto.value.AutoValue;
+
+import javax.annotation.concurrent.Immutable;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Optional;
 
 /** Request to download a file. */
-public interface UpdateDownloaderRequest {
-  /** Creates a new builder to create a {@link UpdateDownloaderRequest}. */
+@AutoValue
+@Immutable
+public abstract class UpdateDownloaderRequest {
+  public abstract String urlToDownload();
+  public abstract String downloadPath();
+
+  /** @return a new builder to create a {@link UpdateDownloaderRequest}. */
   static Builder newBuilder() {
-    return new Builder.DefaultUpdateDownloaderRequest();
+    return new AutoValue_UpdateDownloaderRequest.Builder();
   }
-  
-  String urlToDownload();
-  String downloadPath();
-  
-  boolean overwriteUpdateIfItExists();
-  
-  Optional<String> newVersion();
-  
+
   /** Builder to create {@link UpdateDownloaderRequest}s. */
-  interface Builder {
-    Builder setUrlToDownload(String urlToDownload);
-    Builder setDownloadPath(String downloadPath);
-    Builder setOverwriteUpdateIfItExists(boolean overwriteUpdateIfItExists);
-    Builder setOptionalNewVersion(Optional<String> newVersion);
-  
-    default Builder setDownloadPath(Path path, String fileName) {
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setUrlToDownload(String urlToDownload);
+    public abstract Builder setDownloadPath(String downloadPath);
+
+    public Builder setDownloadPath(Path path, String fileName) {
       return setDownloadPath(path.toString() + "/" + fileName);
     }
-  
-    default Builder setDownloadPath(File file) {
+
+    public Builder setDownloadPath(File file) {
       return setDownloadPath(file.getAbsolutePath());
     }
-    
-    UpdateDownloaderRequest build();
-    
-    final class DefaultUpdateDownloaderRequest implements Builder {
-      private String urlToDownload, downloadPath;
-      private boolean overwriteUpdateIfItExists;
-      private Optional<String> newVersion = Optional.empty();
-      
-      @Override
-      public Builder setUrlToDownload(String urlToDownload) {
-        this.urlToDownload = urlToDownload;
-        return this;
-      }
-  
-      @Override
-      public Builder setDownloadPath(String downloadPath) {
-        this.downloadPath = downloadPath;
-        return this;
-      }
-  
-      @Override
-      public Builder setOverwriteUpdateIfItExists(boolean overwriteUpdateIfItExists) {
-        this.overwriteUpdateIfItExists = overwriteUpdateIfItExists;
-        return this;
-      }
-  
-      @Override
-      public Builder setOptionalNewVersion(Optional<String> newVersion) {
-        this.newVersion = newVersion;
-        return this;
-      }
-  
-      @Override
-      public UpdateDownloaderRequest build() {
-        checkNotNull(urlToDownload);
-        checkNotNull(downloadPath);
-        checkNotNull(newVersion);
-        return new UpdateDownloaderRequest() {
-          @Override
-          public String urlToDownload() {
-            return urlToDownload;
-          }
-  
-          @Override
-          public String downloadPath() {
-            return downloadPath;
-          }
-  
-          @Override
-          public boolean overwriteUpdateIfItExists() {
-            return overwriteUpdateIfItExists;
-          }
-  
-          @Override
-          public Optional<String> newVersion() {
-            return newVersion;
-          }
-        };
-      }
-    }
+
+    /** @return a new {@link UpdateDownloaderRequest} based from this builder. */
+    public abstract UpdateDownloaderRequest build();
   }
 }

@@ -15,80 +15,34 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.auto.value.AutoValue;
+
+import javax.annotation.concurrent.Immutable;
 
 import java.util.Optional;
 
 /** Request to check for up-to-date an url. */
-public interface CheckUpToDateRequest {
-  /** Creates a new builder to create a {@link CheckUpToDateRequest}. */
-  static Builder newBuilder() {
-    return new Builder.DefaultCheckUpToDateRequestBuilder();
+@AutoValue
+@Immutable
+public abstract class CheckUpToDateRequest {
+  public abstract String urlToCheck();
+  public abstract String currentVersion();
+
+  public abstract Optional<VersionExtractor> versionExtractor();
+
+  /** @return a new builder to create a {@link CheckUpToDateRequest}. */
+  public static CheckUpToDateRequest.Builder newBuilder() {
+    return new AutoValue_CheckUpToDateRequest.Builder();
   }
-  
-  /** @return a new {@link CheckUpToDateRequest} from the given url and version. */
-  static CheckUpToDateRequest of(String urlToCheck, String currentVersion) {
-    return newBuilder().setUrlToCheck(urlToCheck).setCurrentVersion(currentVersion).build();
-  }
-  
-  String urlToCheck();
-  String currentVersion();
-  
-  Optional<VersionExtractor> versionExtractor();
-  
+
   /** Builder for {@link CheckUpToDateRequest}. */
-  interface Builder {
-    Builder setUrlToCheck(String urlToCheck);
-    Builder setCurrentVersion(String currentVersion);
-    Builder setVersionExtractor(Optional<VersionExtractor> versionExtractor);
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setUrlToCheck(String urlToCheck);
+    public abstract Builder setCurrentVersion(String currentVersion);
+    public abstract Builder setVersionExtractor(Optional<VersionExtractor> versionExtractor);
   
     /** @return a new {@link CheckUpToDateRequest} based from this builder. */
-    CheckUpToDateRequest build();
-    
-    final class DefaultCheckUpToDateRequestBuilder implements Builder {
-      private String urlToCheck, currentVersion;
-      private Optional<VersionExtractor> versionExtractor = Optional.empty();
-  
-      @Override
-      public Builder setUrlToCheck(String urlToCheck) {
-        this.urlToCheck = urlToCheck;
-        return this;
-      }
-  
-      @Override
-      public Builder setCurrentVersion(String version) {
-        this.currentVersion = version;
-        return this;
-      }
-  
-      @Override
-      public Builder setVersionExtractor(Optional<VersionExtractor> versionExtractor) {
-        this.versionExtractor = versionExtractor;
-        return this;
-      }
-  
-      @Override
-      public CheckUpToDateRequest build() {
-        checkNotNull(urlToCheck);
-        checkNotNull(currentVersion);
-        checkNotNull(versionExtractor);
-        return new CheckUpToDateRequest() {
-          @Override
-          public String urlToCheck() {
-            return urlToCheck;
-          }
-  
-          @Override
-          public String currentVersion() {
-            return currentVersion;
-          }
-  
-          @Override
-          public Optional<VersionExtractor> versionExtractor() {
-            return versionExtractor;
-          }
-        };
-      }
-    }
+    public abstract CheckUpToDateRequest build();
   }
 }

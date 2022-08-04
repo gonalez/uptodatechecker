@@ -15,62 +15,29 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.auto.value.AutoValue;
+
+import javax.annotation.concurrent.Immutable;
 
 /** Response of {@link CheckUpToDateRequest}. */
-public interface CheckUpToDateResponse {
-  /** Creates a new builder to create a {@link CheckUpToDateResponse}. */
-  static Builder newBuilder() {
-    return new Builder.DefaultCheckUpToDateResponseBuilder();
+@AutoValue
+@Immutable
+public abstract class CheckUpToDateResponse {
+  public abstract String newVersion();
+  public abstract boolean isUpToDate();
+
+  /** @return a new builder to create a {@link CheckUpToDateResponse}. */
+  public static Builder newBuilder() {
+    return new AutoValue_CheckUpToDateResponse.Builder();
   }
-  
-  /** @return a new {@link CheckUpToDateRequest} from the given data and isUpToDate. */
-  static CheckUpToDateResponse of(String newVersion, boolean isUpToDate) {
-    return newBuilder().setNewVersion(newVersion).setIsUpToDate(isUpToDate).build();
-  }
-  
-  String newVersion();
-  boolean isUpToDate();
-  
+
   /** Builder for {@link CheckUpToDateResponse}. */
-  interface Builder {
-    Builder setNewVersion(String newVersion);
-    Builder setIsUpToDate(boolean isUpToDate);
+  @AutoValue.Builder
+  public abstract static class Builder {
+    public abstract Builder setNewVersion(String newVersion);
+    public abstract Builder setIsUpToDate(boolean isUpToDate);
   
     /** @return a new {@link CheckUpToDateResponse} based from this builder. */
-    CheckUpToDateResponse build();
-    
-    final class DefaultCheckUpToDateResponseBuilder implements Builder {
-      private String newVersion;
-      private boolean upToDate;
-      
-      @Override
-      public Builder setNewVersion(String newVersion) {
-        this.newVersion = newVersion;
-        return this;
-      }
-  
-      @Override
-      public Builder setIsUpToDate(boolean isUpToDate) {
-        this.upToDate = isUpToDate;
-        return this;
-      }
-  
-      @Override
-      public CheckUpToDateResponse build() {
-        checkNotNull(newVersion);
-        return new CheckUpToDateResponse() {
-          @Override
-          public String newVersion() {
-            return newVersion;
-          }
-  
-          @Override
-          public boolean isUpToDate() {
-            return upToDate;
-          }
-        };
-      }
-    }
+    public abstract CheckUpToDateResponse build();
   }
 }

@@ -47,12 +47,11 @@ public class UpdateDownloaderTest {
     updateDownloader.downloadUpdate(
         UpdateDownloaderRequest.newBuilder()
             .setUrlToDownload(ApiUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(UpToDateCheckerTest.RESOURCE_ID))
-            .setDownloadPath(temporaryDirectory, "test-{new_version}.jar")
-            .setOptionalNewVersion(Optional.of("2.5"))
+            .setDownloadPath(temporaryDirectory, "example.jar")
             .build())
         .get();
     for (File file : temporaryDirectory.toFile().listFiles()) {
-      assertEquals("test-2.5.jar", file.getName());
+      assertEquals("example.jar", file.getName());
     }
   }
 }
