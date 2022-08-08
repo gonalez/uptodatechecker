@@ -16,15 +16,16 @@
 package io.github.gonalez.uptodatechecker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Optional;
 
 /** Tests for {@link UpdateDownloader}. */
 public class UpdateDownloaderTest {
@@ -38,8 +39,8 @@ public class UpdateDownloaderTest {
   static void setup() throws Exception {
     updateDownloader =
         new FileUpdateDownloader(
-            MoreExecutors.newDirectExecutorService(),
-            UrlBytesReader.defaultInstance());
+            directExecutor(), new HttpClientImpl(directExecutor()),
+            Options.newBuilder().build());
   }
   
   @Test

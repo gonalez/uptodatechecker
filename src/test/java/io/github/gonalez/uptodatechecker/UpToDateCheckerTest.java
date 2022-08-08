@@ -16,10 +16,11 @@
 package io.github.gonalez.uptodatechecker;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -36,11 +37,10 @@ public class UpToDateCheckerTest {
   static void setup() throws Exception {
     upToDateChecker =
         new UpToDateCheckerImpl(
-            MoreExecutors.newDirectExecutorService(),
-            UrlBytesReader.defaultInstance(),
-            UpToDateCheckerHelper.EQUAL_STRATEGY);
+            directExecutor(), new HttpClientImpl(directExecutor()),
+            String::equals, Options.newBuilder().build());
   }
-  
+
   @Test
   public void testInvalidUrlCheckUpToDate() throws Exception {
     ExecutionException executionException =
@@ -48,16 +48,14 @@ public class UpToDateCheckerTest {
             ExecutionException.class,
             () -> upToDateChecker.checkUpToDate(
                 CheckUpToDateRequest.newBuilder()
-                    .setUrlToCheck("https://nothing")
+                    .setUrlToCheck("invalid")
                     .setCurrentVersion("")
                     .build(),
-            new UpToDateChecker.Callback(){}).get());
-    
+                new UpToDateChecker.Callback(){}).get());
+
     assertInstanceOf(UpToDateCheckerException.class, executionException.getCause());
-    assertEquals(UpToDateCheckerExceptionCode.FAIL_TO_READ_URL_BYTES_CODE,
-        ((UpToDateCheckerException) executionException.getCause()).getExceptionCode());
   }
-  
+
   @Test
   public void testMatch() throws Exception {
     assertTrue(checkUpToDateMatching(ApiUrls.SPIGOT_API_URL.apply(RESOURCE_ID), "3.8").get());

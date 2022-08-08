@@ -26,10 +26,10 @@ public enum UpToDateCheckerExceptionCode {
   
   // Url related errors
   INVALID_URL_CODE(300),
-  FAIL_TO_READ_URL_BYTES_CODE(301),
+  FAIL_TO_CONNECT_CODE(301),
   
   // Parse related errors
-  FAIL_TO_PARSE_VERSION(302);
+  FAIL_TO_PARSE_VERSION_CODE(302);
   
   // Mapping of all exception code values by its {@code errorCode}
   private static final ImmutableMap<Integer, UpToDateCheckerExceptionCode> CODES_TO_EXCEPTION_CODE;

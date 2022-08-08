@@ -19,6 +19,7 @@ import com.google.common.util.concurrent.AsyncCallable;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.AsyncFunction;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -64,12 +65,16 @@ public final class LegacyFutures {
   }
   
   public static <V, T> ListenableFuture<T> transformAsync(
-      ListenableFuture<V> future, Function<V, ListenableFuture<T>> transformFunction, Executor executor) {
+      ListenableFuture<V> future, AsyncFunction<V, T> transformFunction, Executor executor) {
     AwaitingSettableFuture<T> settableFuture = AwaitingSettableFuture.awaiting(executor);
     Futures.addCallback(callAsync(returningAsyncFuture(future), executor), new FutureCallback<>() {
       @Override
       public void onSuccess(V result) {
-        settableFuture.setFuture(transformFunction.apply(result));
+        try {
+          settableFuture.setFuture(transformFunction.apply(result));
+        } catch (Exception e) {
+          onFailure(e);
+        }
       }
   
       @Override
@@ -79,7 +84,7 @@ public final class LegacyFutures {
     });
     return settableFuture;
   }
-  
+
   public static <V> ListenableFuture<V> schedulePeriodicAsync(
       AsyncCallable<V> callable, long period, TimeUnit timeUnit, Executor executor) {
     RepeatingCallableFuture<V> repeatingInterruptedCallable =

@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.github.gonalez.uptodatechecker;
+package io.github.gonalez.uptodatechecker.http;
 
-import java.io.IOException;
-import java.net.URL;
+import com.google.common.util.concurrent.ListenableFuture;
 
-/** Responsible for reading the content of an url in bytes. */
-public interface UrlBytesReader {
-  /** @return a default, instance of UrlBytesReader. */
-  static UrlBytesReader defaultInstance() {
-    return UrlBytesReaderImpl.INSTANCE;
-  }
-  
-  /** Reads the contents of the given url into a byte array. */
-  byte[] readUrlBytes(URL url) throws IOException;
+/** Responsible for executing asynchronous HTTP requests. */
+public interface HttpClient {
+  /** Returns a {@code ListenableFuture<HttpResponse>} of the given {@link HttpRequest}. */
+  ListenableFuture<HttpResponse> requestAsync(HttpRequest request);
 }

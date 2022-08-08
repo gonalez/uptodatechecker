@@ -21,15 +21,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
+import io.github.gonalez.uptodatechecker.http.HttpClient;
+import io.github.gonalez.uptodatechecker.http.HttpRequest;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
 /**
- * A basic implementation for {@link UpToDateChecker}. Results are cached by the {@link CheckUpToDateRequest#urlToCheck}.
+ * A basic implementation for {@link UpToDateChecker}.
  *
  * <p>To determine if something is up-to-date or not, we use the {@code versionMatchStrategy} function, and then
  * we compare it with the given request {@link CheckUpToDateRequest#currentVersion()} and the parsed, string content of
@@ -41,55 +42,54 @@ import java.util.function.BiFunction;
 @SuppressWarnings("UnstableApiUsage")
 public class UpToDateCheckerImpl implements UpToDateChecker {
   private final Executor executor;
-  private final UrlBytesReader urlBytesReader;
+  private final HttpClient httpClient;
   private final BiFunction<String, String, Boolean> versionMatchStrategy;
   private final Optional<UpToDateChecker.Callback> optionalCallback;
-  
-  private final ConcurrentHashMap<String, ListenableFuture<CheckUpToDateResponse>> futuresCache = new ConcurrentHashMap<>();
-  
+  private final Options options;
+
   public UpToDateCheckerImpl(
       Executor executor,
-      UrlBytesReader urlBytesReader,
-      BiFunction<String, String, Boolean> versionMatchStrategy) {
-    this(executor, urlBytesReader, versionMatchStrategy, Optional.empty());
+      HttpClient httpClient,
+      BiFunction<String, String, Boolean> versionMatchStrategy,
+      Options options) {
+    this(executor, httpClient, versionMatchStrategy, Optional.empty(), options);
   }
   
   public UpToDateCheckerImpl(
       Executor executor,
-      UrlBytesReader urlBytesReader,
+      HttpClient httpClient,
       BiFunction<String, String, Boolean> versionMatchStrategy,
-      Optional<UpToDateChecker.Callback> optionalCallback) {
+      Optional<UpToDateChecker.Callback> optionalCallback,
+      Options options) {
     this.executor = checkNotNull(executor);
-    this.urlBytesReader = checkNotNull(urlBytesReader);
+    this.httpClient = checkNotNull(httpClient);
     this.versionMatchStrategy = checkNotNull(versionMatchStrategy);
     this.optionalCallback = checkNotNull(optionalCallback);
+    this.options = checkNotNull(options);
   }
   
   @Override
   public ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback) {
-    if (futuresCache.containsKey(request.urlToCheck())) {
-      return futuresCache.get(request.urlToCheck());
-    }
     final Callback requestCallback;
     if (optionalCallback.isPresent() && callback != null) {
       requestCallback = Callback.chaining(ImmutableList.of(optionalCallback.get(), callback));
     } else {
       requestCallback = optionalCallback.orElse(callback);
     }
-    ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
-        LegacyFutures.catchingAsync(
-            LegacyFutures.callAsync(() -> {
-              String urlContentToString =
-                  new String(UpToDateCheckerHelper.urlContentToBytes(urlBytesReader, request.urlToCheck()));
+    return LegacyFutures.catchingAsync(
+        LegacyFutures.transformAsync(
+            httpClient.requestAsync(HttpRequest.of(request.urlToCheck(), options)),
+            httpResponse -> {
+              String body = httpResponse.body();
               if (request.versionExtractor().isPresent()) {
-                urlContentToString = request.versionExtractor().get().extractVersion(urlContentToString);
+                body = request.versionExtractor().get().extractVersion(body);
               }
               CheckUpToDateResponse response =
                   CheckUpToDateResponse.newBuilder()
-                      .setNewVersion(urlContentToString)
-                      // Determine if the version is up-to-date or not by applying the function {@code versionMatchStrategy}
-                      // to the request version and the parsed, url string {@code urlContentToString}
-                      .setIsUpToDate(versionMatchStrategy.apply(request.currentVersion(), urlContentToString))
+                      .setNewVersion(body)
+                      // Determine if the version is up-to-date or not by applying the {@code versionMatchStrategy}
+                      // to the request version and the parsed, url response {@code body}
+                      .setIsUpToDate(versionMatchStrategy.apply(request.currentVersion(), body))
                       .build();
               if (requestCallback != null) {
                 requestCallback.onSuccess(response);
@@ -101,19 +101,12 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
               }
               return Futures.immediateFuture(response);
             }, executor),
-            Exception.class,
-            cause -> {
-              if (requestCallback != null) {
-                requestCallback.onError(cause);
-              }
-              return Futures.immediateFailedFuture(cause);
-            }, executor);
-    futuresCache.put(request.urlToCheck(), responseListenableFuture);
-    return responseListenableFuture;
-  }
-  
-  @Override
-  public void clear() {
-    futuresCache.clear();
+        Exception.class,
+        cause -> {
+          if (requestCallback != null) {
+            requestCallback.onError(cause);
+          }
+          return Futures.immediateFailedFuture(cause);
+        }, executor);
   }
 }

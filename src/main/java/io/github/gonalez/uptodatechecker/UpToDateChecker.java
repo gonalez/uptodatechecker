@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
+import io.github.gonalez.uptodatechecker.http.HttpClient;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -89,13 +90,12 @@ public interface UpToDateChecker {
   
   /** Creates a new {@link UpToDateChecker} based on the given specifications. */
   static UpToDateChecker of(
-      ListeningExecutorService executorService, UrlBytesReader urlBytesReader,
-      BiFunction<String, String, Boolean> matchStrategy, Optional<Callback> optionalCallback) {
+      ListeningExecutorService executorService, HttpClient httpClient,
+      BiFunction<String, String, Boolean> matchStrategy, Optional<Callback> optionalCallback,
+      Options options) {
     return new UpToDateCheckerImpl(
-        executorService,
-        urlBytesReader,
-        matchStrategy,
-        optionalCallback);
+        executorService, httpClient,
+        matchStrategy, optionalCallback, options);
   }
   
   /**
@@ -106,7 +106,4 @@ public interface UpToDateChecker {
    * @return a future to a {@link CheckUpToDateResponse} representing the result of the given request.
    */
   ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
-
-  /** Resets the state of this checker. */
-  void clear();
 }
