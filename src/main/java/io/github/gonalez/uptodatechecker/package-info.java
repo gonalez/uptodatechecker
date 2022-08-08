@@ -16,9 +16,5 @@
 
 /**
  * This package contains the core API for the UpToDateChecker library.
- *
- * <p>The entry point for the API is the {@link io.github.gonalez.uptodatechecker.UpToDateChecker},
- * additionally {@link io.github.gonalez.uptodatechecker.FluentUpToDateCheckerCall} can be used to
- * interact with the API in an easier way, although this is not recommended.
  */
 package io.github.gonalez.uptodatechecker;
