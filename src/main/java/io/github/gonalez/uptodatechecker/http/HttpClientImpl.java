@@ -51,27 +51,32 @@ public class HttpClientImpl implements HttpClient {
     return LegacyFutures.catchingAsync(
         LegacyFutures.callAsync(
             () -> {
-              HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-              urlConnection.setConnectTimeout(request.connectTimeout());
-              urlConnection.setReadTimeout(request.readTimeout());
-
-              urlConnection.setDoInput(true);
-              urlConnection.setInstanceFollowRedirects(false);
-
-              int responseCode;
+              HttpURLConnection urlConnection = null;
               try {
-                urlConnection.connect();
-                responseCode = urlConnection.getResponseCode();
-              } catch (IOException e) {
-                return Futures.immediateFailedFuture(UpToDateCheckerExceptionCode.FAIL_TO_CONNECT_CODE.toException());
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setConnectTimeout(request.connectTimeout());
+                urlConnection.setReadTimeout(request.readTimeout());
+                urlConnection.setDoInput(true);
+                urlConnection.setInstanceFollowRedirects(false);
+                int responseCode;
+                try {
+                  urlConnection.connect();
+                  responseCode = urlConnection.getResponseCode();
+                } catch (IOException e) {
+                  return Futures.immediateFailedFuture(UpToDateCheckerExceptionCode.FAIL_TO_CONNECT_CODE.toException());
+                }
+                HttpResponse.Builder builder =
+                    HttpResponse.newBuilder()
+                        .setResponseCode(responseCode);
+                try (InputStream input = urlConnection.getInputStream()) {
+                  builder.setBody(new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8));
+                }
+                return Futures.immediateFuture(builder.build());
+              } finally {
+                if (urlConnection != null) {
+                  urlConnection.disconnect();
+                }
               }
-
-              HttpResponse.Builder builder = HttpResponse.newBuilder();
-              builder.setResponseCode(responseCode);
-              try (InputStream input = urlConnection.getInputStream()) {
-                builder.setBody(new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8));
-              }
-              return Futures.immediateFuture(builder.build());
             }, executor),
         Exception.class,
         Futures::immediateFailedFuture, executor);
