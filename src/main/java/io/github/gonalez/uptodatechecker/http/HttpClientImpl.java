@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 
 /** A basic implementation for {@link HttpClient} which uses {@link HttpURLConnection}. */
@@ -56,8 +55,10 @@ public class HttpClientImpl implements HttpClient {
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setConnectTimeout(request.connectTimeout());
                 urlConnection.setReadTimeout(request.readTimeout());
+
                 urlConnection.setDoInput(true);
-                urlConnection.setInstanceFollowRedirects(false);
+                urlConnection.setInstanceFollowRedirects(true);
+
                 int responseCode;
                 try {
                   urlConnection.connect();
@@ -69,7 +70,7 @@ public class HttpClientImpl implements HttpClient {
                     HttpResponse.newBuilder()
                         .setResponseCode(responseCode);
                 try (InputStream input = urlConnection.getInputStream()) {
-                  builder.setBody(new String(ByteStreams.toByteArray(input), StandardCharsets.UTF_8));
+                  builder.setBody(ByteStreams.toByteArray(input));
                 }
                 return Futures.immediateFuture(builder.build());
               } finally {

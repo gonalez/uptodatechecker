@@ -15,24 +15,6 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import java.util.function.Function;
-
-/** Common api urls to be used for convenience when building a {@link CheckUpToDateRequest}. */
-// setUrlToCheck(ApiUrls.SPIGOT_API_URL.apply("80940"))
-public enum ApiUrls implements Function<String, String> {
-  // Version checking APIs
-  SPIGOT_API_URL("https://api.spigotmc.org/legacy/update.php?resource=%s"),
-  // File downloading APIs
-  SPIGET_DOWNLOAD_UPDATE_FILE_URL("https://api.spiget.org/v2/resources/%s/download");
-  
-  final String apiUrl;
-  
-  private ApiUrls(String apiUrl) {
-    this.apiUrl = apiUrl;
-  }
-  
-  @Override
-  public String apply(String s) {
-    return String.format(apiUrl, s);
-  }
+/** Marker interface for the {@link GetLatestVersionApi<GetLatestVersionContext>}. */
+public interface GetLatestVersionContext {
 }

@@ -30,11 +30,11 @@ public abstract class UpdateDownloaderRequest {
   public abstract String downloadPath();
 
   /** @return a new builder to create a {@link UpdateDownloaderRequest}. */
-  static Builder newBuilder() {
+  public static Builder newBuilder() {
     return new AutoValue_UpdateDownloaderRequest.Builder();
   }
 
-  /** Builder to create {@link UpdateDownloaderRequest}s. */
+  /** Builder for {@link UpdateDownloaderRequest}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setUrlToDownload(String urlToDownload);

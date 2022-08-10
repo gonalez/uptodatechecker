@@ -17,8 +17,11 @@ package io.github.gonalez.uptodatechecker;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-/** Responsible for downloading up-to-date checker updates. */
-public interface UpdateDownloader {
-  /** @return a future representing if the download succeeds or not. */
-  ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request);
+/** Responsible for providing the latest version for a given request. */
+public interface GetLatestVersionApi<Context extends GetLatestVersionContext> {
+  /** @return the name of this provider. */
+  String name();
+
+  /** @return a {@code ListenableFuture<String>} containing the latest version of the given request. */
+  ListenableFuture<String> getLatestVersion(Context context);
 }

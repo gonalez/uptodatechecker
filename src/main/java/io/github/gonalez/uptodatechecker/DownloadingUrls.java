@@ -15,22 +15,21 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-/** Something that can be cancelled. */
-@FunctionalInterface
-public interface Cancellable {
-  /** Chains the specified {@code Cancellable}s. */
-  static Cancellable chaining(Iterable<Cancellable> cancellables) {
-    return () -> {
-      for (Cancellable cancellable : cancellables) {
-        try {
-          cancellable.cancel();
-        } catch (Throwable ignored) {
-          // Suppress the exception to allow cancel the other pending {@code cancellables}
-        }
-      }
-    };
+import java.util.function.Function;
+
+/** Common downloading urls to be used for the {@link io.github.gonalez.uptodatechecker.UpdateDownloaderRequest#urlToDownload()}. */
+public enum DownloadingUrls implements Function<String, String> {
+  // File downloading APIs
+  SPIGET_DOWNLOAD_UPDATE_FILE_URL("https://api.spiget.org/v2/resources/%s/download");
+
+  final String apiUrl;
+
+  private DownloadingUrls(String apiUrl) {
+    this.apiUrl = apiUrl;
   }
-  
-  /** Cancels the action. */
-  void cancel();
+
+  @Override
+  public String apply(String s) {
+    return String.format(apiUrl, s);
+  }
 }

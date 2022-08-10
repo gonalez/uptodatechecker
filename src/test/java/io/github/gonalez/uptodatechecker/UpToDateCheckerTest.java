@@ -15,80 +15,62 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
+import io.github.gonalez.uptodatechecker.providers.SpigetGetLatestVersionContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.util.concurrent.ExecutionException;
+import java.io.File;
+import java.nio.file.Path;
 
 /** Tests for {@link UpToDateChecker}. */
+// TODO (gonalez): Improve tests
 public class UpToDateCheckerTest {
   // ZNPCs resource id
   static final String RESOURCE_ID = "80940";
 
+  @TempDir
+  static Path temporaryDirectory;
+
   private static UpToDateChecker upToDateChecker;
-  
+
+
   @BeforeAll
   static void setup() throws Exception {
+    HttpClientImpl httpClient = new HttpClientImpl(directExecutor());
     upToDateChecker =
         new UpToDateCheckerImpl(
-            directExecutor(), new HttpClientImpl(directExecutor()),
-            String::equals, Options.newBuilder().build());
+            directExecutor(),
+            new FileUpdateDownloader(directExecutor(), httpClient, Options.DEFAULT_OPTIONS),
+            new LibGetLatestVersionApiProviderSupplier(directExecutor(), httpClient));
   }
 
   @Test
-  public void testInvalidUrlCheckUpToDate() throws Exception {
-    ExecutionException executionException =
-        assertThrows(
-            ExecutionException.class,
-            () -> upToDateChecker.checkUpToDate(
-                CheckUpToDateRequest.newBuilder()
-                    .setUrlToCheck("invalid")
-                    .setCurrentVersion("")
-                    .build(),
-                new UpToDateChecker.Callback(){}).get());
+  public void testDownloading() throws Exception {
+    ListenableFuture<CheckUpToDateResponse> responseFuture =
+        upToDateChecker.checkingUpToDateWithDownloadingAndScheduling().withRequest(
+                "3.8",
+                SpigetGetLatestVersionContext.newBuilder()
+                    .setResourceId(RESOURCE_ID)
+                    .build())
+            .then()
+            .downloading()
+            .download(response -> UpdateDownloaderRequest.newBuilder()
+                .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
+                .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.newVersion()))
+                .build())
+            .response();
 
-    assertInstanceOf(UpToDateCheckerException.class, executionException.getCause());
-  }
+    // await result
+    responseFuture.get();
 
-  @Test
-  public void testMatch() throws Exception {
-    assertTrue(checkUpToDateMatching(ApiUrls.SPIGOT_API_URL.apply(RESOURCE_ID), "3.8").get());
-  }
-  
-  @Test
-  public void testMismatch() throws Exception {
-   assertFalse(checkUpToDateMatching(ApiUrls.SPIGOT_API_URL.apply("0"), "1.0").get());
-  }
-  
-  private ListenableFuture<Boolean> checkUpToDateMatching(String url, String version) {
-    return checkUpToDateMatching(CheckUpToDateRequest.newBuilder().setUrlToCheck(url).setCurrentVersion(version).build());
-  }
-  
-  private ListenableFuture<Boolean> checkUpToDateMatching(CheckUpToDateRequest checkUpToDateRequest) {
-    SettableFuture<Boolean> matchSettableFuture = SettableFuture.create();
-    upToDateChecker.checkUpToDate(checkUpToDateRequest,
-        new UpToDateChecker.Callback() {
-          @Override
-          public void onUpToDate(CheckUpToDateResponse response) {
-            matchSettableFuture.set(true);
-          }
-  
-          @Override
-          public void onNotUpToDate(CheckUpToDateResponse response) {
-            matchSettableFuture.set(false);
-          }
-  
-          @Override
-          public void onError(Throwable throwable) {
-            matchSettableFuture.set(false);
-          }
-        });
-    return matchSettableFuture;
+    for (File file : temporaryDirectory.toFile().listFiles()) {
+      assertTrue(file.getName().startsWith("update"));
+    }
   }
 }

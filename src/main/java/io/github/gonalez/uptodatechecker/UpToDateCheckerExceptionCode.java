@@ -29,7 +29,10 @@ public enum UpToDateCheckerExceptionCode {
   FAIL_TO_CONNECT_CODE(301),
   
   // Parse related errors
-  FAIL_TO_PARSE_VERSION_CODE(302);
+  FAIL_TO_PARSE_VERSION_CODE(302),
+
+  // Version related errors
+  FAIL_TO_GET_LATEST_VERSION_FROM_CONTEXT(500);
   
   // Mapping of all exception code values by its {@code errorCode}
   private static final ImmutableMap<Integer, UpToDateCheckerExceptionCode> CODES_TO_EXCEPTION_CODE;

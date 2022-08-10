@@ -17,13 +17,18 @@ package io.github.gonalez.uptodatechecker.http;
 
 import com.google.auto.value.AutoValue;
 import javax.annotation.concurrent.Immutable;
+import java.nio.charset.StandardCharsets;
 
 /** Response of {@link HttpClient#requestAsync(HttpRequest)}. */
 @AutoValue
 @Immutable
 public abstract class HttpResponse {
   /** @return the body of the response. */
-  public abstract String body();
+  public abstract byte[] body();
+
+  public String bodyString() {
+    return new String(body(), StandardCharsets.UTF_8);
+  }
 
   /** @return the code of the response. */
   public abstract int responseCode();
@@ -36,7 +41,8 @@ public abstract class HttpResponse {
   /** Builder for {@link HttpResponse}. */
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract Builder setBody(String body);
+    public abstract Builder setBody(byte[] body);
+
     public abstract Builder setResponseCode(int responseCode);
     public abstract HttpResponse build();
   }

@@ -1,0 +1,54 @@
+/*
+ * Copyright 2022 - Gaston Gonzalez (Gonalez)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.github.gonalez.uptodatechecker.providers;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.JsonElement;
+import io.github.gonalez.uptodatechecker.GetLatestVersionApi;
+import io.github.gonalez.uptodatechecker.HttpGetLatestVersionApi;
+import io.github.gonalez.uptodatechecker.Options;
+import io.github.gonalez.uptodatechecker.http.HttpClient;
+import io.github.gonalez.uptodatechecker.http.HttpRequest;
+
+import java.util.concurrent.Executor;
+
+/** A {@link GetLatestVersionApi} that can get the latest version of a Spigot resource. */
+public class SpigetGetLatestVersionApi extends HttpGetLatestVersionApi<SpigetGetLatestVersionContext> {
+  private static final String LATEST_VERSION_URL = "https://api.spiget.org/v2/resources/%s/versions/latest";
+
+  public SpigetGetLatestVersionApi(Executor executor, HttpClient httpClient) {
+    super(executor, httpClient);
+  }
+
+  @Override
+  public String name() {
+    return "spiget";
+  }
+
+  @Override
+  protected HttpRequest buildRequest(SpigetGetLatestVersionContext context) {
+    return HttpRequest.of(String.format(LATEST_VERSION_URL, context.resourceId()), Options.DEFAULT_OPTIONS);
+  }
+
+  @Override
+  protected String readVersion(JsonElement jsonElement) {
+    return jsonElement
+        .getAsJsonObject()
+        .get("name")
+        .getAsString();
+  }
+}

@@ -18,31 +18,39 @@ package io.github.gonalez.uptodatechecker;
 import com.google.auto.value.AutoValue;
 
 import javax.annotation.concurrent.Immutable;
-
 import java.util.Optional;
 
 /** Request to check for up-to-date an url. */
 @AutoValue
 @Immutable
-public abstract class CheckUpToDateRequest {
-  public abstract String urlToCheck();
+public abstract class CheckUpToDateRequest<Context extends GetLatestVersionContext> {
+  /** @return the context that will be used to get the latest version. */
+  public abstract Context context();
+
+  /**
+   * Returns the current version that will be checked against the latest version to
+   * check if the response is up-to-date or not.
+   */
   public abstract String currentVersion();
 
-  public abstract Optional<VersionExtractor> versionExtractor();
+  /** @return the optional callback to invoke when executing the up-to-date checker. */
+  public abstract Optional<UpToDateChecker.Callback> optionalCallback();
 
   /** @return a new builder to create a {@link CheckUpToDateRequest}. */
-  public static CheckUpToDateRequest.Builder newBuilder() {
-    return new AutoValue_CheckUpToDateRequest.Builder();
+  public static <Context extends GetLatestVersionContext> CheckUpToDateRequest.Builder<Context> newBuilder() {
+    return new AutoValue_CheckUpToDateRequest.Builder<Context>()
+        .setOptionalCallback(Optional.empty());
   }
 
   /** Builder for {@link CheckUpToDateRequest}. */
   @AutoValue.Builder
-  public abstract static class Builder {
-    public abstract Builder setUrlToCheck(String urlToCheck);
-    public abstract Builder setCurrentVersion(String currentVersion);
-    public abstract Builder setVersionExtractor(Optional<VersionExtractor> versionExtractor);
-  
-    /** @return a new {@link CheckUpToDateRequest} based from this builder. */
-    public abstract CheckUpToDateRequest build();
+  public abstract static class Builder<Context extends GetLatestVersionContext> {
+    public abstract Builder<Context> setContext(Context context);
+    public abstract Builder<Context> setCurrentVersion(String currentVersion);
+
+    public abstract Builder<Context> setOptionalCallback(Optional<UpToDateChecker.Callback> optionalCallback);
+
+    /** @return a new {@link CheckUpToDateRequest} from this builder. */
+    public abstract CheckUpToDateRequest<Context>  build();
   }
 }

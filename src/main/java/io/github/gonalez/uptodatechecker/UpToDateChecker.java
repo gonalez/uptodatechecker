@@ -15,95 +15,80 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import io.github.gonalez.uptodatechecker.http.HttpClient;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
-/**
- * The entry point of the UpToDateChecker library.
- */
+/** The entry point of the UpToDateChecker library. */
 @ThreadSafe
 public interface UpToDateChecker {
-  /** Functions to be called when calling {@link #checkUpToDate(CheckUpToDateRequest, Callback)}. */
+  /** Functions to be called when we got the response for {@link #checkingUpToDateWithDownloadingAndScheduling()}. */
   interface Callback {
-    /** Chains the specified {@code Callback}s. */
-    static Callback chaining(Iterable<Callback> callbacks) {
-      return new ChainingUpToDateCheckerCallback(callbacks);
-    }
-    
     /** Called whenever a response has been completed with no errors. */
     default void onSuccess(CheckUpToDateResponse response) {}
     
-    /** Called after {@link #onSuccess(CheckUpToDateResponse)}. */
+    /** Called after {@link #onSuccess(CheckUpToDateResponse)} if the response is up-to-date. */
     default void onUpToDate(CheckUpToDateResponse response) {}
     
-    /** Called after {@link #onSuccess(CheckUpToDateResponse)}. */
+    /** Called after {@link #onSuccess(CheckUpToDateResponse)} if the response is not up-to-date. */
     default void onNotUpToDate(CheckUpToDateResponse response) {}
     
     /** Called if any error occurs. */
     default void onError(Throwable throwable) {}
-    
-    /** Provides a basic chaining {@link Callback} of an iterable of callbacks. */
-    final class ChainingUpToDateCheckerCallback implements Callback {
-      private final Iterable<Callback> callbacks;
-      
-      public ChainingUpToDateCheckerCallback(Iterable<Callback> callbacks) {
-        this.callbacks = requireNonNull(callbacks);
-      }
-  
-      @Override
-      public void onSuccess(CheckUpToDateResponse response) {
-        for (Callback callback : callbacks) {
-          callback.onSuccess(response);
-        }
-      }
-  
-      @Override
-      public void onUpToDate(CheckUpToDateResponse response) {
-        for (Callback callback : callbacks) {
-          callback.onUpToDate(response);
-        }
-      }
-  
-      @Override
-      public void onNotUpToDate(CheckUpToDateResponse response) {
-        for (Callback callback : callbacks) {
-          callback.onNotUpToDate(response);
-        }
-      }
-      
-      @Override
-      public void onError(Throwable throwable) {
-        for (Callback callback : callbacks) {
-          callback.onError(throwable);
-        }
-      }
-    }
   }
-  
-  /** Creates a new {@link UpToDateChecker} based on the given specifications. */
-  static UpToDateChecker of(
-      ListeningExecutorService executorService, HttpClient httpClient,
-      BiFunction<String, String, Boolean> matchStrategy, Optional<Callback> optionalCallback,
-      Options options) {
-    return new UpToDateCheckerImpl(
-        executorService, httpClient,
-        matchStrategy, optionalCallback, options);
-  }
-  
+
   /**
-   * Asynchronously checks if the given request is up-to-date or not.
+   * Returns the default implementation for the fluent api of the UpToDateChecker library that allows
+   * checking for up-to-date an url, scheduling and downloading against checker.
    *
-   * @param request the request to use for check up-to-date.
-   * @param callback the optional callback to execute when the future has been completed.
-   * @return a future to a {@link CheckUpToDateResponse} representing the result of the given request.
+   * <p>Downloading and scheduling happens after the {@link CheckUpToDateOperation} was configured
+   * correctly by calling {@link ThenOperation#then()}, if it was not configured correctly it will
+   * not be possible to continue the next operations.
    */
-  ListenableFuture<CheckUpToDateResponse> checkUpToDate(CheckUpToDateRequest request, @Nullable Callback callback);
+  CheckingUpToDateWithDownloadingAndScheduling checkingUpToDateWithDownloadingAndScheduling();
+
+  /** Operation that allows a combination of two actions to be performed together. */
+  interface ThenOperation<T> {
+    /** Switch to the next operation. */
+    T then();
+  }
+
+  /** The base operation of the api required for the basic functionality (checking for up-to-date an url). */
+  interface CheckUpToDateOperation<T> {
+    T withRequest(String currentVersion, GetLatestVersionContext latestVersionContext);
+    T withCallback(@Nullable Callback callback);
+  }
+
+  /** Operation that adds support for downloading a new update for the up-to-date-checker. */
+  interface DownloadingOperation<T> {
+    T download(Function<CheckUpToDateResponse, UpdateDownloaderRequest> computeUpdateDownloaderRequestFunction);
+  }
+
+  /** Operation that adds support for scheduling the up-to-date-checker. */
+  interface SchedulingOperation<T> extends ThenOperation<T> {
+    T schedule(long period, TimeUnit unit);
+  }
+
+  /** Chains {@link DownloadingOperation} and {@link SchedulingOperation} together. */
+  interface DownloadingAndSchedulingOperation<T> {
+    DownloadingOperation<T> downloading();
+    SchedulingOperation<T> scheduling();
+  }
+
+  /**
+   * The last operation that the user wants to execute, after this is called is not possible to
+   * reach other operations.
+   */
+  interface GetOperation {
+    ListenableFuture<CheckUpToDateResponse> response();
+  }
+
+  /** @see #checkingUpToDateWithDownloadingAndScheduling() */
+  interface CheckingUpToDateWithDownloadingAndScheduling
+      extends CheckUpToDateOperation<CheckingUpToDateWithDownloadingAndScheduling>, ThenOperation<
+         DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>>,
+      GetOperation {}
 }

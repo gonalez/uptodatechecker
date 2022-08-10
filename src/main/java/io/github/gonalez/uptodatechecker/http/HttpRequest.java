@@ -33,7 +33,9 @@ public abstract class HttpRequest {
   }
 
   public abstract String url();
+
   public abstract int connectTimeout();
+
   public abstract int readTimeout();
 
   /** @return a new builder to create a {@link HttpRequest}. */

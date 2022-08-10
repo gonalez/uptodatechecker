@@ -15,10 +15,9 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,8 @@ import java.nio.file.Path;
 
 /** Tests for {@link UpdateDownloader}. */
 public class UpdateDownloaderTest {
-  
+  private static final String EXAMPLE_DOWNLOAD_URL = "https://www.gstatic.com/icing/idd/apitest/zip_test_folder.zip";
+
   @TempDir
   static Path temporaryDirectory;
   
@@ -46,13 +46,13 @@ public class UpdateDownloaderTest {
   @Test
   public void testFileUpdateDownloader() throws Exception {
     updateDownloader.downloadUpdate(
-        UpdateDownloaderRequest.newBuilder()
-            .setUrlToDownload(ApiUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(UpToDateCheckerTest.RESOURCE_ID))
-            .setDownloadPath(temporaryDirectory, "example.jar")
-            .build())
+            UpdateDownloaderRequest.newBuilder()
+                .setUrlToDownload(EXAMPLE_DOWNLOAD_URL)
+                .setDownloadPath(temporaryDirectory, "example.zip")
+                .build())
         .get();
     for (File file : temporaryDirectory.toFile().listFiles()) {
-      assertEquals("example.jar", file.getName());
+      assertEquals("example.zip", file.getName());
     }
   }
 }

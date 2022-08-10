@@ -15,7 +15,8 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-/** Constants used by the {@code UpToDateChecker}. */
-public class Constants {
-  public static final String NEW_VERSION_PLACEHOLDER = "{new_version}";
+import java.util.function.Supplier;
+
+/** Responsible for providing {@link GetLatestVersionApiProvider}s. */
+public interface GetLatestVersionApiProviderSupplier extends Supplier<GetLatestVersionApiProvider> {
 }

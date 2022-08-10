@@ -60,7 +60,7 @@ public final class LegacyFutures {
          else
            settableFuture.setException(t);
       }
-    });
+    }, executor);
     return settableFuture;
   }
   
@@ -81,7 +81,7 @@ public final class LegacyFutures {
       public void onFailure(Throwable t) {
         settableFuture.setException(t);
       }
-    });
+    }, executor);
     return settableFuture;
   }
 
@@ -97,11 +97,6 @@ public final class LegacyFutures {
   private static <V> AsyncCallable<V> returningAsyncFuture(ListenableFuture<V> future) {
     return () -> future;
   }
-  
-  /** Returns an immediate, {@code ListenableFuture} whose value is null. */
-  public static <V> ListenableFuture<V> immediateNullFuture() {
-    return Futures.immediateFuture(null);
-  }
-  
+
   private LegacyFutures() {}
 }

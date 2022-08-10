@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
 
 /** A {@link UpdateDownloader} which can download update files to a path. */
@@ -54,7 +55,7 @@ public class FileUpdateDownloader implements UpdateDownloader {
         httpClient.requestAsync(HttpRequest.of(request.urlToDownload(), options)),
         httpResponse -> {
           try (FileOutputStream outputStream = new FileOutputStream(file)) {
-            ByteStreams.copy(new ByteArrayInputStream(httpResponse.body().getBytes()), outputStream);
+            ByteStreams.copy(new ByteArrayInputStream(httpResponse.body()), outputStream);
           } catch (IOException e) {
             return Futures.immediateFailedFuture(e);
           }
