@@ -18,12 +18,10 @@ package io.github.gonalez.uptodatechecker;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /** The entry point of the UpToDateChecker library. */
-@ThreadSafe
 public interface UpToDateChecker {
   /** Functions to be called when we got the response for {@link #checkingUpToDateWithDownloadingAndScheduling()}. */
   interface Callback {
@@ -79,8 +77,7 @@ public interface UpToDateChecker {
   }
 
   /**
-   * The last operation that the user wants to execute, after this is called is not possible to
-   * reach other operations.
+   * The last operation that the user wants to execute, after this is called is not possible to reach other operations.
    */
   interface GetOperation {
     ListenableFuture<CheckUpToDateResponse> response();
@@ -89,6 +86,5 @@ public interface UpToDateChecker {
   /** @see #checkingUpToDateWithDownloadingAndScheduling() */
   interface CheckingUpToDateWithDownloadingAndScheduling
       extends CheckUpToDateOperation<CheckingUpToDateWithDownloadingAndScheduling>, ThenOperation<
-         DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>>,
-      GetOperation {}
+         DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>>, GetOperation {}
 }
