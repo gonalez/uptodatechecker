@@ -26,6 +26,7 @@ public abstract class HttpResponse {
   /** @return the body of the response. */
   public abstract byte[] body();
 
+  /** @return the {@link #body() response body} as a {@link String}. */
   public String bodyString() {
     return new String(body(), StandardCharsets.UTF_8);
   }
