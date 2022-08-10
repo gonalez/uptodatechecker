@@ -15,18 +15,9 @@
  */
 package io.github.gonalez.uptodatechecker.providers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import io.github.gonalez.uptodatechecker.GetLatestVersionApi;
 import io.github.gonalez.uptodatechecker.HttpGetLatestVersionApi;
-import io.github.gonalez.uptodatechecker.Options;
-import io.github.gonalez.uptodatechecker.UpToDateCheckerExceptionCode;
-import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 import io.github.gonalez.uptodatechecker.http.HttpClient;
 import io.github.gonalez.uptodatechecker.http.HttpRequest;
 
@@ -48,7 +39,7 @@ public class GithubGetLatestVersionApi extends HttpGetLatestVersionApi<GithubGet
 
   @Override
   protected HttpRequest buildRequest(GithubGetLatestVersionContext context) {
-    return HttpRequest.of(String.format(LATEST_VERSION_URL, context.repoOwner(), context.repoName()), Options.DEFAULT_OPTIONS);
+    return HttpRequest.newBuilder().setUrl(String.format(LATEST_VERSION_URL, context.repoOwner(), context.repoName())).build();
   }
 
   @Override

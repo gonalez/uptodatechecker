@@ -23,7 +23,10 @@ import javax.annotation.concurrent.Immutable;
 @AutoValue
 @Immutable
 public abstract class CheckUpToDateResponse {
-  public abstract String newVersion();
+  /** @return the latest version for the request. */
+  public abstract String latestVersion();
+
+  /** @return {@code true} if the request is up-to-date. */
   public abstract boolean isUpToDate();
 
   /** @return a new builder to create a {@link CheckUpToDateResponse}. */
@@ -34,7 +37,7 @@ public abstract class CheckUpToDateResponse {
   /** Builder for {@link CheckUpToDateResponse}. */
   @AutoValue.Builder
   public abstract static class Builder {
-    public abstract Builder setNewVersion(String newVersion);
+    public abstract Builder setLatestVersion(String latestVersion);
     public abstract Builder setIsUpToDate(boolean isUpToDate);
   
     /** @return a new {@link CheckUpToDateResponse} based from this builder. */

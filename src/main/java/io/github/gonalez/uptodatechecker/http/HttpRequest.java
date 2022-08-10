@@ -19,37 +19,30 @@ import com.google.auto.value.AutoValue;
 import io.github.gonalez.uptodatechecker.Options;
 
 import javax.annotation.concurrent.Immutable;
+import java.util.Optional;
 
 /** Request of {@link HttpResponse}. */
 @AutoValue
 @Immutable
 public abstract class HttpRequest {
-  /** @return a new {@link HttpRequest} for the given specifications. */
-  public static HttpRequest of(String url, Options options) {
-    return newBuilder().setUrl(url)
-        .setConnectTimeout(options.connectTimeout())
-        .setReadTimeout(options.readTimeout())
-        .build();
-  }
-
+  /** @return the url to perform the request. */
   public abstract String url();
 
-  public abstract int connectTimeout();
-
-  public abstract int readTimeout();
+  /** @return the options to be used for the request. */
+  public abstract Options options();
 
   /** @return a new builder to create a {@link HttpRequest}. */
   public static Builder newBuilder() {
-    return new AutoValue_HttpRequest.Builder();
+    return new AutoValue_HttpRequest.Builder().setOptions(Options.DEFAULT_OPTIONS);
   }
 
   /** Builder for {@link HttpRequest}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setUrl(String url);
-    public abstract Builder setConnectTimeout(int connectTimeout);
-    public abstract Builder setReadTimeout(int readTimeout);
+    public abstract Builder setOptions(Options options);
 
+    /** @return a new {@link HttpRequest} from this builder. */
     public abstract HttpRequest build();
   }
 }

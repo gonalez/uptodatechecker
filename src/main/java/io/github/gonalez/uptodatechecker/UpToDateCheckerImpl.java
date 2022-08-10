@@ -69,6 +69,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
     private final SettableFuture<CheckUpToDateResponse> responseSettableFuture = SettableFuture.create();
 
+    /** @return {@code this}. */
     CheckingUpToDateWithDownloadingAndScheduling thisInstance() {
       return this;
     }
@@ -115,7 +116,9 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
             public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
               responseSettableFuture.setFuture(
                   LegacyFutures.schedulePeriodicAsync(
-                      () -> checkUpToDate(requestBuilder.build(), executor),
+                      () -> {
+                        return checkUpToDate(requestBuilder.build(), executor);
+                      },
                       period,
                       unit,
                       executor));
@@ -136,7 +139,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
       return responseSettableFuture;
     }
 
-    public <Context extends GetLatestVersionContext> ListenableFuture<CheckUpToDateResponse> checkUpToDate(
+    private <Context extends GetLatestVersionContext> ListenableFuture<CheckUpToDateResponse> checkUpToDate(
         CheckUpToDateRequest<Context> request, Executor executor) {
       Optional<GetLatestVersionApi<Context>> maybeGetProviderForContext =
           latestVersionApiProviderSupplier.get().get(request.context());
@@ -153,7 +156,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
               latestVersion -> {
                 CheckUpToDateResponse response =
                     CheckUpToDateResponse.newBuilder()
-                        .setNewVersion(latestVersion)
+                        .setLatestVersion(latestVersion)
                         // Determine if the version is up-to-date or not by applying the {@code versionMatchStrategy}
                         // to the request version and the {@code latestVersion}
                         .setIsUpToDate(request.currentVersion().equalsIgnoreCase(latestVersion))

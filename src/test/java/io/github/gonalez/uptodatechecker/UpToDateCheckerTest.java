@@ -62,7 +62,7 @@ public class UpToDateCheckerTest {
             .downloading()
             .download(response -> UpdateDownloaderRequest.newBuilder()
                 .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
-                .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.newVersion()))
+                .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.latestVersion()))
                 .build())
             .response();
 

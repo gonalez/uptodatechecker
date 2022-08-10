@@ -17,9 +17,11 @@ package io.github.gonalez.uptodatechecker.http;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import io.github.gonalez.uptodatechecker.Options;
 import io.github.gonalez.uptodatechecker.UpToDateCheckerExceptionCode;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
@@ -53,8 +55,8 @@ public class HttpClientImpl implements HttpClient {
               HttpURLConnection urlConnection = null;
               try {
                 urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setConnectTimeout(request.connectTimeout());
-                urlConnection.setReadTimeout(request.readTimeout());
+                urlConnection.setConnectTimeout(request.options().connectTimeout());
+                urlConnection.setReadTimeout(request.options().readTimeout());
 
                 urlConnection.setDoInput(true);
                 urlConnection.setInstanceFollowRedirects(true);

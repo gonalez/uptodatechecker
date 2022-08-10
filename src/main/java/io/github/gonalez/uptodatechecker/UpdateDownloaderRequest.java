@@ -26,7 +26,10 @@ import java.nio.file.Path;
 @AutoValue
 @Immutable
 public abstract class UpdateDownloaderRequest {
+  /** @return the url to download. */
   public abstract String urlToDownload();
+
+  /** @return the path to where the content will be downloaded. */
   public abstract String downloadPath();
 
   /** @return a new builder to create a {@link UpdateDownloaderRequest}. */

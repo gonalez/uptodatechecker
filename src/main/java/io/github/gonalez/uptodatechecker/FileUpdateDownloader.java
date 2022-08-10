@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /** A {@link UpdateDownloader} which can download update files to a path. */
@@ -52,7 +53,11 @@ public class FileUpdateDownloader implements UpdateDownloader {
   public ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
     File file = new File(request.downloadPath());
     return LegacyFutures.transformAsync(
-        httpClient.requestAsync(HttpRequest.of(request.urlToDownload(), options)),
+        httpClient.requestAsync(
+            HttpRequest.newBuilder()
+                .setUrl(request.urlToDownload())
+                .setOptions(options)
+                .build()),
         httpResponse -> {
           try (FileOutputStream outputStream = new FileOutputStream(file)) {
             ByteStreams.copy(new ByteArrayInputStream(httpResponse.body()), outputStream);

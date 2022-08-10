@@ -27,6 +27,7 @@ public abstract class GithubGetLatestVersionContext implements GetLatestVersionC
     public abstract Builder setRepoOwner(String repoOwner);
     public abstract Builder setRepoName(String repoName);
 
+    /** @return a new {@link GithubGetLatestVersionContext} from this builder. */
     public abstract GithubGetLatestVersionContext build();
   }
 }

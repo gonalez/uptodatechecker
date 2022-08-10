@@ -21,6 +21,7 @@ import io.github.gonalez.uptodatechecker.GetLatestVersionContext;
 /** Context to get the {@link SpigetGetLatestVersionApi latest version} of a Spigot resource. */
 @AutoValue
 public abstract class SpigetGetLatestVersionContext implements GetLatestVersionContext {
+  /** @return the spigot resource-id to get the latest version for. */
   public abstract String resourceId();
 
   /** @return a new builder to create a {@link SpigetGetLatestVersionContext}. */
@@ -31,8 +32,12 @@ public abstract class SpigetGetLatestVersionContext implements GetLatestVersionC
   /** Builder to create {@link SpigetGetLatestVersionContext}s. */
   @AutoValue.Builder
   public abstract static class Builder {
+    /**
+     * Sets the spigot resource-id that will be used to get the latest version.
+     */
     public abstract Builder setResourceId(String resourceId);
 
+    /** @return a new {@link SpigetGetLatestVersionContext} from this builder. */
     public abstract SpigetGetLatestVersionContext build();
   }
 }

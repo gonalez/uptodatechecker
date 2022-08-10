@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package io.github.gonalez.uptodatechecker.providers;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonElement;
 import io.github.gonalez.uptodatechecker.GetLatestVersionApi;
 import io.github.gonalez.uptodatechecker.HttpGetLatestVersionApi;
-import io.github.gonalez.uptodatechecker.Options;
 import io.github.gonalez.uptodatechecker.http.HttpClient;
 import io.github.gonalez.uptodatechecker.http.HttpRequest;
 
@@ -41,7 +38,7 @@ public class SpigetGetLatestVersionApi extends HttpGetLatestVersionApi<SpigetGet
 
   @Override
   protected HttpRequest buildRequest(SpigetGetLatestVersionContext context) {
-    return HttpRequest.of(String.format(LATEST_VERSION_URL, context.resourceId()), Options.DEFAULT_OPTIONS);
+    return HttpRequest.newBuilder().setUrl(String.format(LATEST_VERSION_URL, context.resourceId())).build();
   }
 
   @Override
