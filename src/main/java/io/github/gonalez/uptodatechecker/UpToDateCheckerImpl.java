@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  * determined by the {@link CheckUpToDateRequest#context()}}.
  *
  * <p>{@code latestVersionApiProviderSupplier} supplies the instance of the {@link GetLatestVersionApiProvider} for
- * getting the appropriate {@link GetLatestVersionApi<GetLatestVersionContext>} of the given {@linkplain
+ * getting the appropriate {@link GetLatestVersionApi} of the given {@linkplain
  * CheckingUpToDateWithDownloadingAndScheduling#withRequest(String, GetLatestVersionContext) context}
  */
 @SuppressWarnings("UnstableApiUsage")
