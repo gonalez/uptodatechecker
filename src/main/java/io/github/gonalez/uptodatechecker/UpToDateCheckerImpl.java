@@ -124,11 +124,6 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                       executor));
               return thisInstance();
             }
-
-            @Override
-            public CheckingUpToDateWithDownloadingAndScheduling then() {
-              return thisInstance();
-            }
           };
         }
       };

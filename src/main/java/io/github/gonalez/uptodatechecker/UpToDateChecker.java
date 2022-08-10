@@ -42,11 +42,11 @@ public interface UpToDateChecker {
 
   /**
    * Returns the default implementation for the fluent api of the UpToDateChecker library that allows
-   * checking for up-to-date an url, scheduling and downloading against checker.
+   * checking for up-to-date an url, scheduling and downloading against the checker.
    *
-   * <p>Downloading and scheduling happens after the {@link CheckUpToDateOperation} was configured
-   * correctly by calling {@link ThenOperation#then()}, if it was not configured correctly it will
-   * not be possible to continue the next operations.
+   * <p>Downloading and scheduling are available after calling {@link ThenOperation#then()} if the
+   * {@link CheckUpToDateOperation} was configured correctly, if it was not configured correctly it
+   * will not be possible to perform the next operations.
    */
   CheckingUpToDateWithDownloadingAndScheduling checkingUpToDateWithDownloadingAndScheduling();
 
@@ -68,7 +68,7 @@ public interface UpToDateChecker {
   }
 
   /** Operation that adds support for scheduling the up-to-date-checker. */
-  interface SchedulingOperation<T> extends ThenOperation<T> {
+  interface SchedulingOperation<T> {
     T schedule(long period, TimeUnit unit);
   }
 
