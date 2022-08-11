@@ -29,7 +29,7 @@ public abstract class SpigetGetLatestVersionContext implements GetLatestVersionC
     return new AutoValue_SpigetGetLatestVersionContext.Builder();
   }
 
-  /** Builder to create {@link SpigetGetLatestVersionContext}s. */
+  /** Builder for {@link SpigetGetLatestVersionContext}. */
   @AutoValue.Builder
   public abstract static class Builder {
     /**

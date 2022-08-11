@@ -21,7 +21,7 @@ public abstract class GithubGetLatestVersionContext implements GetLatestVersionC
     return new AutoValue_GithubGetLatestVersionContext.Builder();
   }
 
-  /** Builder to create {@link GithubGetLatestVersionContext}s. */
+  /** Builder for {@link GithubGetLatestVersionContext}. */
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setRepoOwner(String repoOwner);

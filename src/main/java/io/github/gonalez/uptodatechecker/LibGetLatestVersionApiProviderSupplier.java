@@ -32,11 +32,13 @@ public class LibGetLatestVersionApiProviderSupplier implements GetLatestVersionA
   public LibGetLatestVersionApiProviderSupplier(Executor executor, HttpClient httpClient) {
     checkNotNull(executor);
     checkNotNull(httpClient);
-    this.latestVersionApiProvider =
-        GetLatestVersionApiProvider.newBuilder()
-            .addLatestVersionProviderApi(GithubGetLatestVersionContext.class, new GithubGetLatestVersionApi(executor, httpClient))
-            .addLatestVersionProviderApi(SpigetGetLatestVersionContext.class, new SpigetGetLatestVersionApi(executor, httpClient))
-            .build();
+
+    GetLatestVersionApiProvider.Builder builder = GetLatestVersionApiProvider.newBuilder();
+    builder.addLatestVersionProviderApi(
+        GithubGetLatestVersionContext.class, new GithubGetLatestVersionApi(executor, httpClient));
+    builder.addLatestVersionProviderApi(
+        SpigetGetLatestVersionContext.class, new SpigetGetLatestVersionApi(executor, httpClient));
+    this.latestVersionApiProvider = builder.build();
   }
 
   @Override
