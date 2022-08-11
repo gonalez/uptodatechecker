@@ -18,17 +18,14 @@ package io.github.gonalez.uptodatechecker.concurrent;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.AsyncCallable;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A {@link AbstractFuture} that is also a runnable, the logic to repeat the future is behind the {@link #run()} method.
- * This blocks the thread in which it was called until is {@link #cancel(boolean) cancelled}.
- *
- * <p>{@code callable} is the callable to be called on each repetition, we
- * wait {@code period} using the {@code timeUnit} to go for the next repetition.
+ * A {@link AbstractFuture} that is also a runnable, it allows to repeat the possible result of the future until
+ * it is {@link #cancel(boolean) cancelled}, we wait {@code period} of the {@code timeUnit} to set the next result
+ * of this future, the result is based on the {@code callable}.
  */
 @SuppressWarnings("UnstableApiUsage")
 final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runnable {

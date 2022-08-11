@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * An {@link AbstractFuture} which acts like as a {@code SettableFuture} except that it controls
- * how long we can wait to have the set value of the {@code SettableFuture}.
+ * how long we can wait to have the result of the {@code SettableFuture}.
  */
 @SuppressWarnings("UnstableApiUsage")
 public final class AwaitingSettableFuture<V> extends AbstractFuture<V> implements Runnable {
