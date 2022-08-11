@@ -53,13 +53,16 @@ public class UpToDateCheckerTest {
   @Test
   public void testDownloading() throws Exception {
     ListenableFuture<CheckUpToDateResponse> responseFuture =
-        upToDateChecker.checkingUpToDateWithDownloadingAndScheduling().withRequest(
-                "3.8",
-                SpigetGetLatestVersionContext.newBuilder()
-                    .setResourceId(RESOURCE_ID)
+        upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
+            .requesting(
+                CheckUpToDateRequest.newBuilder()
+                    .setContext(
+                        SpigetGetLatestVersionContext.newBuilder()
+                            .setResourceId(RESOURCE_ID)
+                            .build())
+                    .setCurrentVersion("3.8")
                     .build())
             .then()
-            .downloading()
             .download(response -> UpdateDownloaderRequest.newBuilder()
                 .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
                 .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.latestVersion()))

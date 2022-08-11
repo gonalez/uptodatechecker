@@ -17,7 +17,6 @@ package io.github.gonalez.uptodatechecker;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -56,8 +55,7 @@ public interface UpToDateChecker {
 
   /** The base operation of the api required for the basic functionality (checking for up-to-date an url). */
   interface CheckUpToDateOperation<T> {
-    T withRequest(String currentVersion, GetLatestVersionContext latestVersionContext);
-    T withCallback(@Nullable Callback callback);
+    T requesting(CheckUpToDateRequest<GetLatestVersionContext> checkUpToDateRequest);
   }
 
   /** Operation that adds support for downloading a new update for the up-to-date-checker. */
@@ -70,21 +68,17 @@ public interface UpToDateChecker {
     T schedule(long period, TimeUnit unit);
   }
 
-  /** Chains {@link DownloadingOperation} and {@link SchedulingOperation} together. */
-  interface DownloadingAndSchedulingOperation<T> {
-    DownloadingOperation<T> downloading();
-    SchedulingOperation<T> scheduling();
-  }
+  /** Operation that is both a {@link DownloadingOperation} and a {@link SchedulingOperation}. */
+  interface DownloadingAndSchedulingOperation<T> extends DownloadingOperation<T>, SchedulingOperation<T> {}
 
-  /**
-   * The last operation that the user wants to execute, after this is called is not possible to reach other operations.
-   */
-  interface GetOperation {
+  /** Represents the composed response from the operations that were called. */
+  interface ResponseOperation {
     ListenableFuture<CheckUpToDateResponse> response();
   }
 
   /** @see #checkingUpToDateWithDownloadingAndScheduling() */
   interface CheckingUpToDateWithDownloadingAndScheduling
       extends CheckUpToDateOperation<CheckingUpToDateWithDownloadingAndScheduling>, ThenOperation<
-         DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>>, GetOperation {}
+         DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>>,
+      ResponseOperation {}
 }

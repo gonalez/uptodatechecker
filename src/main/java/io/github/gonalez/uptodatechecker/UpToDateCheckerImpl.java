@@ -23,11 +23,11 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
-import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -38,8 +38,7 @@ import java.util.function.Supplier;
  * determined by the {@link CheckUpToDateRequest#context()}}.
  *
  * <p>{@code latestVersionApiProviderSupplier} supplies the instance of the {@link GetLatestVersionApiProvider} for
- * getting the appropriate {@link GetLatestVersionApi} of the given {@linkplain
- * CheckingUpToDateWithDownloadingAndScheduling#withRequest(String, GetLatestVersionContext) context}
+ * getting the appropriate {@link GetLatestVersionApi} of the given {@link CheckUpToDateRequest#context() request context}.
  */
 @SuppressWarnings("UnstableApiUsage")
 @NotThreadSafe
@@ -75,16 +74,11 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
     }
 
     @Override
-    public CheckingUpToDateWithDownloadingAndScheduling withRequest(String currentVersion, GetLatestVersionContext latestVersionContext) {
-      requestBuilder.setCurrentVersion(currentVersion);
-      requestBuilder.setContext(latestVersionContext);
-      return this;
-    }
-
-    @Override
-    public CheckingUpToDateWithDownloadingAndScheduling withCallback(@Nullable Callback callback) {
-      requestBuilder.setOptionalCallback(Optional.of(checkNotNull(callback)));
-      return this;
+    public CheckingUpToDateWithDownloadingAndScheduling requesting(CheckUpToDateRequest<GetLatestVersionContext> checkUpToDateRequest) {
+      requestBuilder.setCurrentVersion(checkUpToDateRequest.currentVersion());
+      requestBuilder.setContext(checkUpToDateRequest.context());
+      requestBuilder.setOptionalCallback(checkUpToDateRequest.optionalCallback());
+      return thisInstance();
     }
 
     @Override
@@ -94,37 +88,30 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
       responseSettableFuture.setFuture(checkUpToDate(request, executor));
       return new DownloadingAndSchedulingOperation<>() {
         @Override
-        public DownloadingOperation<CheckingUpToDateWithDownloadingAndScheduling> downloading() {
-          return computeUpdateDownloaderRequestFunction -> {
-            Futures.addCallback(responseSettableFuture, new FutureCallback<>() {
-              @Override
-              public void onSuccess(CheckUpToDateResponse result) {
-                updateDownloader.downloadUpdate(computeUpdateDownloaderRequestFunction.apply(result));
-              }
-
-              @Override
-              public void onFailure(Throwable t) {}
-            }, executor);
-            return thisInstance();
-          };
+        public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
+          responseSettableFuture.setFuture(
+              LegacyFutures.schedulePeriodicAsync(
+                  () -> {
+                    return checkUpToDate(requestBuilder.build(), executor);
+                  },
+                  period,
+                  unit,
+                  executor));
+          return thisInstance();
         }
 
         @Override
-        public SchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling> scheduling() {
-          return new SchedulingOperation<>() {
+        public CheckingUpToDateWithDownloadingAndScheduling download(Function<CheckUpToDateResponse, UpdateDownloaderRequest> computeUpdateDownloaderRequestFunction) {
+          Futures.addCallback(responseSettableFuture, new FutureCallback<>() {
             @Override
-            public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
-              responseSettableFuture.setFuture(
-                  LegacyFutures.schedulePeriodicAsync(
-                      () -> {
-                        return checkUpToDate(requestBuilder.build(), executor);
-                      },
-                      period,
-                      unit,
-                      executor));
-              return thisInstance();
+            public void onSuccess(CheckUpToDateResponse result) {
+              updateDownloader.downloadUpdate(computeUpdateDownloaderRequestFunction.apply(result));
             }
-          };
+
+            @Override
+            public void onFailure(Throwable t) {}
+          }, executor);
+          return thisInstance();
         }
       };
     }
