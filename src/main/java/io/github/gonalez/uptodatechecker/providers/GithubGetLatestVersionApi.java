@@ -31,7 +31,6 @@ public class GithubGetLatestVersionApi extends HttpGetLatestVersionApi<GithubGet
     super(executor, httpClient);
   }
 
-
   @Override
   public String name() {
     return "github";
