@@ -52,14 +52,16 @@ public class UpToDateCheckerTest {
 
   @Test
   public void testDownloading() throws Exception {
+    GetLatestVersionContext latestVersionContext =
+        SpigetGetLatestVersionContext.newBuilder()
+            .setResourceId(RESOURCE_ID)
+            .build();
+
     ListenableFuture<CheckUpToDateResponse> responseFuture =
         upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
             .requesting(
                 CheckUpToDateRequest.newBuilder()
-                    .setContext(
-                        SpigetGetLatestVersionContext.newBuilder()
-                            .setResourceId(RESOURCE_ID)
-                            .build())
+                    .setContext(latestVersionContext)
                     .setCurrentVersion("3.8")
                     .build())
             .then()
