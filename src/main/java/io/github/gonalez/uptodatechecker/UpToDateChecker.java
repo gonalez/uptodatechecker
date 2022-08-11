@@ -38,12 +38,19 @@ public interface UpToDateChecker {
   }
 
   /**
-   * Returns the default implementation for the fluent api of the UpToDateChecker library that allows
-   * checking for up-to-date an url, scheduling and downloading against the checker.
+   * The {@link CheckUpToDateOperation operation} on the fluent api that checks if a {@link CheckUpToDateRequest}
+   * is up-to-date, it also provides other {@link DownloadingAndSchedulingOperation operations} for scheduling
+   * and downloading the request.
    *
-   * <p>Downloading and scheduling are available after calling {@link ThenOperation#then()} if the
-   * {@link CheckUpToDateOperation} was configured correctly, if it was not configured correctly it
-   * will not be possible to perform the next operations.
+   * <pre>{@code
+   * checkingUpToDateWithDownloadingAndScheduling()
+   *     .requesting(checkUpToDateRequest)
+   *     .then()
+   *     .downloading(downloadRequest)
+   *     .then()
+   *     .schedule(period, timeUnit)
+   *     .response();
+   * }</pre>
    */
   CheckingUpToDateWithDownloadingAndScheduling checkingUpToDateWithDownloadingAndScheduling();
 
