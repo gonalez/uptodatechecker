@@ -62,7 +62,7 @@ public class UpToDateCheckerTest {
             .requesting(
                 CheckUpToDateRequest.newBuilder()
                     .setContext(latestVersionContext)
-                    .setCurrentVersion("3.8")
+                    .setCurrentVersion("3.9")
                     .build())
             .then()
             .download(response -> UpdateDownloaderRequest.newBuilder()
@@ -72,8 +72,9 @@ public class UpToDateCheckerTest {
             .response();
 
     // await result
-    responseFuture.get();
+    CheckUpToDateResponse response = responseFuture.get();
 
+    assertTrue(response.isUpToDate());
     for (File file : temporaryDirectory.toFile().listFiles()) {
       assertTrue(file.getName().startsWith("update"));
     }
