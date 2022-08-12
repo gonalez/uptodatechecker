@@ -27,50 +27,47 @@ dependencies {
 Here's a short example that shows how to check if a spigot resource is up-to-date or not.
 
 ```java
+import java.util.concurrent.TimeUnit;
+
 public class ExampleClass {
-  
+
   public static void main(String[] args) {
-    UpToDateChecker upToDateChecker = 
-        UpToDateChecker.of(
-            /*sync*/MoreExecutors.newDirectExecutorService(),
-            UrlBytesReader.defaultInstance(), 
-            UpToDateCheckerHelper.EQUAL_STRATEGY,
-            Optional.empty());
+    UpToDateChecker upToDateChecker =
+        new UpToDateCheckerImpl(executor,
+            new FileUpdateDownloader(executor, httpClient, Options.DEFAULT_OPTIONS),
+            new LibGetLatestVersionApiProviderSupplier(executor, httpClient));
+
+    String resourceId = "...";
     
-    // Create the request to check if the resource is up-to-date
-    ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
-        upToDateChecker.checkUpToDate(
-            CheckUpToDateRequest.newBuilder()
-                .setApiUrl(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
-                .setCurrentVersion(/*versionToMatch*/)
-                .build(),
-            new UpToDateChecker.Callback() {
+    // Create the request to be checked to see if the resource is up-to-date
+    CheckUpToDateRequest checkUpToDateRequest =
+        CheckUpToDateRequest.newBuilder()
+            .setContext(SpigetGetLatestVersionContext.newBuilder().setResourceId(resourceId).build())
+            .setCurrentVersion(currentResourceVersion)
+            .setOptionalCallback(Optional.of(new UpToDateChecker.Callback() {
               @Override
-              public void onUpToDate(CheckUpToDateResponse response) {
-                // called if the version is up-to-date
-              }
-              
+              public void onUpToDate(CheckUpToDateResponse response) {}
+
               @Override
-              public void onNotUpToDate(CheckUpToDateResponse response) {
-                // called if the version is not up-to-date
-              }
-        });
+              public void onNotUpToDate(CheckUpToDateResponse response) {}
+            }))
+            .build();
+
+    ListenableFuture<CheckUpToDateResponse> responseFuture = 
+        upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
+            .requesting(checkUpToDateRequest)
+            .then()
+            .download(response ->
+                UpdateDownloaderRequest.newBuilder()
+                    .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(resourceId))
+                    .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.latestVersion()))
+                    .build())
+            .response();
+    assertTrue(response.isUpToDate());
   }
 }
 ```
-### Fluent Builder Calls API
-A builder to make calls (requests) to an UpToDateChecker easier.
-```java
-Cancellable cancellable =
-    FluentUpToDateCheckerCall.newCall(
-        CheckUpToDateRequest.newBuilder()
-            .setApiUrl(ApiUrls.SPIGOT_API_URL.apply(/*spigotResourceId*/))
-            .setCurrentVersion(/*versionToMatch*/)
-            .build())
-        .setShutdownOnCancel(true)
-        .scheduling(12, TimeUnit.HOURS) // Every how often we should check again?
-    .start();
-```
+
 ## License
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
