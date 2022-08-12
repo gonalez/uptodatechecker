@@ -22,6 +22,12 @@ public interface GetLatestVersionApi<Context extends GetLatestVersionContext> {
   /** @return the name of this provider. */
   String name();
 
+  /**
+   * Returns the type of context that this {@code GetLatestVersionApi} uses to get the
+   * {@link #getLatestVersion(GetLatestVersionContext) latest version}.
+   */
+  Class<Context> getContextType();
+
   /** @return a {@code ListenableFuture<String>} containing the latest version of the given request. */
   ListenableFuture<String> getLatestVersion(Context context);
 }

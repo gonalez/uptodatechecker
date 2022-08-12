@@ -15,12 +15,26 @@
  */
 package io.github.gonalez.uptodatechecker;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Map;
 import java.util.Optional;
 
 /** Responsible for providing {@link GetLatestVersionApi}s for {@link GetLatestVersionContext}s. */
 public interface GetLatestVersionApiProvider {
+  /** @return a new {@link GetLatestVersionApiProvider} of the given {@code latestVersionApis}. */
+  static GetLatestVersionApiProvider of(ImmutableList<GetLatestVersionApiCollection> collections) {
+    GetLatestVersionApiProvider.Builder builder = newBuilder();
+    for (GetLatestVersionApiCollection collection : collections) {
+      for (GetLatestVersionApi<? extends GetLatestVersionContext> latestVersionApi
+          : collection.getLatestVersionApis()) {
+        builder.addLatestVersionProviderApi(latestVersionApi);
+      }
+    }
+    return builder.build();
+  }
+
   /** @return a new builder to create a {@link GetLatestVersionApiProvider}. */
   static GetLatestVersionApiProvider.Builder newBuilder() {
     return new Builder.GetLatestVersionApiProviderImpl();
@@ -33,6 +47,12 @@ public interface GetLatestVersionApiProvider {
   interface Builder {
     <Context extends GetLatestVersionContext> Builder addLatestVersionProviderApi(
         Class<Context> contextClass, GetLatestVersionApi<Context> providerApi);
+
+    default <Context extends GetLatestVersionContext> Builder addLatestVersionProviderApi(
+        GetLatestVersionApi<Context> providerApi) {
+      return addLatestVersionProviderApi(providerApi.getContextType(), providerApi);
+    }
+
 
     /** @return a new {@link GetLatestVersionApiProvider} from this builder. */
     GetLatestVersionApiProvider build();
@@ -58,10 +78,16 @@ public interface GetLatestVersionApiProvider {
             if (!build.containsKey(context.getClass().getSuperclass())) {
               return Optional.empty();
             }
-            @SuppressWarnings("unchecked") // safe
-            GetLatestVersionApi<Context> latestVersionApi =
-                (GetLatestVersionApi<Context>) build.get(context.getClass().getSuperclass());
-            return Optional.of(latestVersionApi);
+            for (Map.Entry<Class<? extends GetLatestVersionContext>,
+                GetLatestVersionApi<?>> latestVersionApiEntry : build.entrySet()) {
+              if (latestVersionApiEntry.getKey().isInstance(context)) {
+                @SuppressWarnings("unchecked") // safe
+                GetLatestVersionApi<Context> latestVersionApi =
+                    (GetLatestVersionApi<Context>) latestVersionApiEntry.getValue();
+                return Optional.of(latestVersionApi);
+              }
+            }
+            return Optional.empty();
           }
         };
       }

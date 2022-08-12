@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * A basic, default implementation for {@link UpToDateChecker}.
@@ -45,15 +44,15 @@ import java.util.function.Supplier;
 public class UpToDateCheckerImpl implements UpToDateChecker {
   private final Executor executor;
   private final UpdateDownloader updateDownloader;
-  private final Supplier<GetLatestVersionApiProvider> latestVersionApiProviderSupplier;
+  private final GetLatestVersionApiProvider latestVersionApiProvider;
 
   public UpToDateCheckerImpl(
       Executor executor,
       UpdateDownloader updateDownloader,
-      Supplier<GetLatestVersionApiProvider> latestVersionApiProviderSupplier) {
+      GetLatestVersionApiProvider latestVersionApiProvider) {
     this.executor = checkNotNull(executor);
     this.updateDownloader = checkNotNull(updateDownloader);
-    this.latestVersionApiProviderSupplier = checkNotNull(latestVersionApiProviderSupplier);
+    this.latestVersionApiProvider = checkNotNull(latestVersionApiProvider);
 
   }
 
@@ -64,7 +63,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
   /** Base implementation for {@link CheckingUpToDateWithDownloadingAndScheduling}. */
   private class CheckingUpToDateWithDownloadingAndSchedulingImpl implements CheckingUpToDateWithDownloadingAndScheduling {
-    private final CheckUpToDateRequest.Builder<GetLatestVersionContext> requestBuilder = CheckUpToDateRequest.newBuilder();
+    private final CheckUpToDateRequest.Builder requestBuilder = CheckUpToDateRequest.newBuilder();
 
     private final SettableFuture<CheckUpToDateResponse> responseSettableFuture = SettableFuture.create();
 
@@ -74,7 +73,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
     }
 
     @Override
-    public CheckingUpToDateWithDownloadingAndScheduling requesting(CheckUpToDateRequest<GetLatestVersionContext> checkUpToDateRequest) {
+    public CheckingUpToDateWithDownloadingAndScheduling requesting(CheckUpToDateRequest checkUpToDateRequest) {
       requestBuilder.setCurrentVersion(checkUpToDateRequest.currentVersion());
       requestBuilder.setContext(checkUpToDateRequest.context());
       requestBuilder.setOptionalCallback(checkUpToDateRequest.optionalCallback());
@@ -83,9 +82,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
     @Override
     public DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling> then() {
-      CheckUpToDateRequest<GetLatestVersionContext> request =
-          requestBuilder.build();
-      responseSettableFuture.setFuture(checkUpToDate(request, executor));
+      responseSettableFuture.setFuture(checkUpToDate(requestBuilder.build(), executor));
       return new DownloadingAndSchedulingOperation<>() {
         @Override
         public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
@@ -121,10 +118,10 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
       return responseSettableFuture;
     }
 
-    private <Context extends GetLatestVersionContext> ListenableFuture<CheckUpToDateResponse> checkUpToDate(
-        CheckUpToDateRequest<Context> request, Executor executor) {
-      Optional<GetLatestVersionApi<Context>> maybeGetProviderForContext =
-          latestVersionApiProviderSupplier.get().get(request.context());
+    private ListenableFuture<CheckUpToDateResponse> checkUpToDate(
+        CheckUpToDateRequest request, Executor executor) {
+      Optional<GetLatestVersionApi<GetLatestVersionContext>> maybeGetProviderForContext =
+          latestVersionApiProvider.get(request.context());
       if (maybeGetProviderForContext.isEmpty()) {
         return Futures.immediateFailedFuture(
             UpToDateCheckerException.newBuilder()

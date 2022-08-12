@@ -37,6 +37,11 @@ public class SpigetGetLatestVersionApi extends HttpGetLatestVersionApi<SpigetGet
   }
 
   @Override
+  public Class<SpigetGetLatestVersionContext> getContextType() {
+    return SpigetGetLatestVersionContext.class;
+  }
+
+  @Override
   protected HttpRequest buildRequest(SpigetGetLatestVersionContext context) {
     return HttpRequest.newBuilder().setUrl(String.format(LATEST_VERSION_URL, context.resourceId())).build();
   }

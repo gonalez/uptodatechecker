@@ -37,6 +37,11 @@ public class GithubGetLatestVersionApi extends HttpGetLatestVersionApi<GithubGet
   }
 
   @Override
+  public Class<GithubGetLatestVersionContext> getContextType() {
+    return GithubGetLatestVersionContext.class;
+  }
+
+  @Override
   protected HttpRequest buildRequest(GithubGetLatestVersionContext context) {
     return HttpRequest.newBuilder().setUrl(String.format(LATEST_VERSION_URL, context.repoOwner(), context.repoName())).build();
   }

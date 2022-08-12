@@ -15,8 +15,8 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import java.util.function.Supplier;
+import com.google.common.collect.ImmutableList;
 
-/** Responsible for providing {@link GetLatestVersionApiProvider}s. */
-public interface GetLatestVersionApiProviderSupplier extends Supplier<GetLatestVersionApiProvider> {
+public interface GetLatestVersionApiCollection {
+  ImmutableList<GetLatestVersionApi<? extends GetLatestVersionContext>> getLatestVersionApis();
 }

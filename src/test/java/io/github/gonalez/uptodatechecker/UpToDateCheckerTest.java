@@ -18,8 +18,10 @@ package io.github.gonalez.uptodatechecker;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
+import io.github.gonalez.uptodatechecker.providers.ProvidersGetLatestVersionApiCollection;
 import io.github.gonalez.uptodatechecker.providers.SpigetGetLatestVersionContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,7 +49,8 @@ public class UpToDateCheckerTest {
         new UpToDateCheckerImpl(
             directExecutor(),
             new FileUpdateDownloader(directExecutor(), httpClient, Options.DEFAULT_OPTIONS),
-            new LibGetLatestVersionApiProviderSupplier(directExecutor(), httpClient));
+            GetLatestVersionApiProvider.of(ImmutableList.of(
+                new ProvidersGetLatestVersionApiCollection(directExecutor(), httpClient))));
   }
 
   @Test

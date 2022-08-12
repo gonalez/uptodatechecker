@@ -62,7 +62,7 @@ public interface UpToDateChecker {
 
   /** The base operation of the api required for the basic functionality (checking for up-to-date an url). */
   interface CheckUpToDateOperation<T> {
-    T requesting(CheckUpToDateRequest<GetLatestVersionContext> checkUpToDateRequest);
+    T requesting(CheckUpToDateRequest checkUpToDateRequest);
   }
 
   /** Operation that adds support for downloading a new update for the up-to-date-checker. */

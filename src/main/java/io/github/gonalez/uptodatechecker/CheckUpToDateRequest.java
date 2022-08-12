@@ -23,9 +23,9 @@ import java.util.Optional;
 /** Request to check for up-to-date an url. */
 @AutoValue
 @Immutable
-public abstract class CheckUpToDateRequest<Context extends GetLatestVersionContext> {
+public abstract class CheckUpToDateRequest {
   /** @return the context that will be used to get the latest version. */
-  public abstract Context context();
+  public abstract GetLatestVersionContext context();
 
   /**
    * Returns the current version that will be checked against the latest version to
@@ -37,20 +37,20 @@ public abstract class CheckUpToDateRequest<Context extends GetLatestVersionConte
   public abstract Optional<UpToDateChecker.Callback> optionalCallback();
 
   /** @return a new builder to create a {@link CheckUpToDateRequest}. */
-  public static <Context extends GetLatestVersionContext> CheckUpToDateRequest.Builder<Context> newBuilder() {
-    return new AutoValue_CheckUpToDateRequest.Builder<Context>()
+  public static CheckUpToDateRequest.Builder newBuilder() {
+    return new AutoValue_CheckUpToDateRequest.Builder()
         .setOptionalCallback(Optional.empty());
   }
 
   /** Builder for {@link CheckUpToDateRequest}. */
   @AutoValue.Builder
-  public abstract static class Builder<Context extends GetLatestVersionContext> {
-    public abstract Builder<Context> setContext(Context context);
-    public abstract Builder<Context> setCurrentVersion(String currentVersion);
+  public abstract static class Builder {
+    public abstract Builder setContext(GetLatestVersionContext context);
+    public abstract Builder setCurrentVersion(String currentVersion);
 
-    public abstract Builder<Context> setOptionalCallback(Optional<UpToDateChecker.Callback> optionalCallback);
+    public abstract Builder setOptionalCallback(Optional<UpToDateChecker.Callback> optionalCallback);
 
     /** @return a new {@link CheckUpToDateRequest} from this builder. */
-    public abstract CheckUpToDateRequest<Context>  build();
+    public abstract CheckUpToDateRequest  build();
   }
 }
