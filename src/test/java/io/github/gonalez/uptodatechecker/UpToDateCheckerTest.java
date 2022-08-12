@@ -15,8 +15,7 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -29,44 +28,76 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Tests for {@link UpToDateChecker}. */
-// TODO (gonalez): Improve tests
 public class UpToDateCheckerTest {
   // ZNPCs resource id
-  static final String RESOURCE_ID = "80940";
+  public static final String RESOURCE_ID = "80940";
+
+  private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
   @TempDir
-  static Path temporaryDirectory;
+  private static Path temporaryDirectory;
 
   private static UpToDateChecker upToDateChecker;
 
+  private static CheckUpToDateRequest checkUpToDateRequest;
 
   @BeforeAll
-  static void setup() throws Exception {
-    HttpClientImpl httpClient = new HttpClientImpl(directExecutor());
+  static void setup() {
+    HttpClientImpl httpClient = new HttpClientImpl(EXECUTOR_SERVICE);
     upToDateChecker =
         new UpToDateCheckerImpl(
-            directExecutor(),
-            new FileUpdateDownloader(directExecutor(), httpClient, Options.DEFAULT_OPTIONS),
+            EXECUTOR_SERVICE,
+            new FileUpdateDownloader(EXECUTOR_SERVICE, httpClient, Options.DEFAULT_OPTIONS),
             GetLatestVersionApiProvider.of(ImmutableList.of(
-                new ProvidersGetLatestVersionApiCollection(directExecutor(), httpClient))));
+                new ProvidersGetLatestVersionApiCollection(EXECUTOR_SERVICE, httpClient))));
+
+    checkUpToDateRequest =
+        CheckUpToDateRequest.newBuilder()
+            .setContext(SpigetGetLatestVersionContext.newBuilder().setResourceId(RESOURCE_ID).build())
+            .setCurrentVersion("3.9")
+            .build();
+  }
+
+  @Test
+  public void testScheduling() throws Exception {
+    AtomicInteger atomicInteger = new AtomicInteger();
+
+    CheckUpToDateRequest scheduleRequest =
+        CheckUpToDateRequest.newBuilder()
+            .setContext(checkUpToDateRequest.context())
+            .setCurrentVersion(checkUpToDateRequest.currentVersion())
+            .setOptionalCallback(Optional.of(new UpToDateChecker.Callback() {
+              @Override
+              public void onSuccess(CheckUpToDateResponse response) {
+                atomicInteger.incrementAndGet();
+              }
+            })).build();
+
+    ListenableFuture<CheckUpToDateResponse> responseFuture =
+        upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
+            .requesting(scheduleRequest)
+            .then()
+            .schedule(1, TimeUnit.SECONDS)
+            .response();
+
+    Thread.sleep(5000);
+    responseFuture.cancel(true);
+
+    assertThat(atomicInteger.get()).isEqualTo(5);
   }
 
   @Test
   public void testDownloading() throws Exception {
-    GetLatestVersionContext latestVersionContext =
-        SpigetGetLatestVersionContext.newBuilder()
-            .setResourceId(RESOURCE_ID)
-            .build();
-
     ListenableFuture<CheckUpToDateResponse> responseFuture =
         upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
-            .requesting(
-                CheckUpToDateRequest.newBuilder()
-                    .setContext(latestVersionContext)
-                    .setCurrentVersion("3.9")
-                    .build())
+            .requesting(checkUpToDateRequest)
             .then()
             .download(response -> UpdateDownloaderRequest.newBuilder()
                 .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
@@ -76,10 +107,13 @@ public class UpToDateCheckerTest {
 
     // await result
     CheckUpToDateResponse response = responseFuture.get();
+    assertThat(response.isUpToDate()).isTrue();
 
-    assertTrue(response.isUpToDate());
-    for (File file : temporaryDirectory.toFile().listFiles()) {
-      assertTrue(file.getName().startsWith("update"));
-    }
+    File[] tempFiles = temporaryDirectory.toFile().listFiles();
+    assertThat(tempFiles).isNotNull();
+    assertThat(tempFiles).hasLength(1);
+
+    File downloadedFile = tempFiles[0];
+    assertThat(downloadedFile.getName()).startsWith("update");
   }
 }

@@ -17,13 +17,13 @@ package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +65,8 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   private class CheckingUpToDateWithDownloadingAndSchedulingImpl implements CheckingUpToDateWithDownloadingAndScheduling {
     private final CheckUpToDateRequest.Builder requestBuilder = CheckUpToDateRequest.newBuilder();
 
-    private final SettableFuture<CheckUpToDateResponse> responseSettableFuture = SettableFuture.create();
+    private final List<Function<ListenableFuture<CheckUpToDateResponse>,
+        ListenableFuture<CheckUpToDateResponse>>> operations = new ArrayList<>();
 
     /** @return {@code this}. */
     CheckingUpToDateWithDownloadingAndScheduling thisInstance() {
@@ -82,15 +83,12 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
     @Override
     public DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling> then() {
-      responseSettableFuture.setFuture(checkUpToDate(requestBuilder.build(), executor));
       return new DownloadingAndSchedulingOperation<>() {
         @Override
         public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
-          responseSettableFuture.setFuture(
+          operations.add(checkUpToDateResponseListenableFuture ->
               LegacyFutures.schedulePeriodicAsync(
-                  () -> {
-                    return checkUpToDate(requestBuilder.build(), executor);
-                  },
+                  () -> checkUpToDate(requestBuilder.build(), executor),
                   period,
                   unit,
                   executor));
@@ -99,15 +97,14 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
         @Override
         public CheckingUpToDateWithDownloadingAndScheduling download(Function<CheckUpToDateResponse, UpdateDownloaderRequest> computeUpdateDownloaderRequestFunction) {
-          Futures.addCallback(responseSettableFuture, new FutureCallback<>() {
-            @Override
-            public void onSuccess(CheckUpToDateResponse result) {
-              updateDownloader.downloadUpdate(computeUpdateDownloaderRequestFunction.apply(result));
-            }
-
-            @Override
-            public void onFailure(Throwable t) {}
-          }, executor);
+          operations.add(future ->
+              LegacyFutures.transformAsync(
+                  future,
+                  response -> LegacyFutures.transformAsync(
+                      updateDownloader.downloadUpdate(computeUpdateDownloaderRequestFunction.apply(response)),
+                      unused -> {
+                        return Futures.immediateFuture(response);
+                      }, executor), executor));
           return thisInstance();
         }
       };
@@ -115,7 +112,13 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
     @Override
     public ListenableFuture<CheckUpToDateResponse> response() {
-      return responseSettableFuture;
+      ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
+          checkUpToDate(requestBuilder.build(), executor);
+      for (Function<ListenableFuture<CheckUpToDateResponse>,
+          ListenableFuture<CheckUpToDateResponse>> operation : operations) {
+        responseListenableFuture = operation.apply(responseListenableFuture);
+      }
+      return responseListenableFuture;
     }
 
     private ListenableFuture<CheckUpToDateResponse> checkUpToDate(

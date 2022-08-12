@@ -15,10 +15,10 @@
  */
 package io.github.gonalez.uptodatechecker.concurrent;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
-import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
@@ -33,17 +33,18 @@ public class AwaitingSettableFutureTest {
   
   @Test
   public void testAwaitingSuccess() throws Exception {
-    AwaitingSettableFuture<String> awaitingDoneFuture = AwaitingSettableFuture.awaiting(MoreExecutors.directExecutor());
+    AwaitingSettableFuture<String> awaitingDoneFuture = AwaitingSettableFuture.awaiting(directExecutor());
     EXECUTOR_SERVICE.submit(awaitingDoneFuture);
+
     awaitingDoneFuture.set("foo");
   }
   
   @Test
   public void testAwaitingFail() throws Exception {
-    AwaitingSettableFuture<String> awaitingDoneFuture = new AwaitingSettableFuture<>(5, TimeUnit.SECONDS, MoreExecutors.directExecutor());
+    AwaitingSettableFuture<String> awaitingDoneFuture = new AwaitingSettableFuture<>(5, TimeUnit.SECONDS, directExecutor());
     EXECUTOR_SERVICE.submit(awaitingDoneFuture);
-    
+
     ExecutionException executionException = assertThrows(ExecutionException.class, awaitingDoneFuture::get);
-    assertInstanceOf(TimeoutException.class, executionException.getCause());
+    assertThat(executionException.getCause()).isInstanceOf(TimeoutException.class);
   }
 }

@@ -16,7 +16,7 @@
 package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,9 +31,9 @@ public class UpdateDownloaderTest {
   private static final String EXAMPLE_DOWNLOAD_URL = "https://www.gstatic.com/icing/idd/apitest/zip_test_folder.zip";
 
   @TempDir
-  static Path temporaryDirectory;
-  
-  static FileUpdateDownloader updateDownloader;
+  private static Path temporaryDirectory;
+
+  private static UpdateDownloader updateDownloader;
   
   @BeforeAll
   static void setup() throws Exception {
@@ -51,8 +51,12 @@ public class UpdateDownloaderTest {
                 .setDownloadPath(temporaryDirectory, "example.zip")
                 .build())
         .get();
-    for (File file : temporaryDirectory.toFile().listFiles()) {
-      assertEquals("example.zip", file.getName());
-    }
+
+    File[] tempFiles = temporaryDirectory.toFile().listFiles();
+    assertThat(tempFiles).isNotNull();
+    assertThat(tempFiles).hasLength(1);
+
+    File downloadedFile = tempFiles[0];
+    assertThat(downloadedFile.getName()).isEqualTo("example.zip");
   }
 }
