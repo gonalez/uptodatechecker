@@ -57,7 +57,6 @@ public interface GetLatestVersionApiProvider {
     /** @return a new {@link GetLatestVersionApiProvider} from this builder. */
     GetLatestVersionApiProvider build();
 
-    @SuppressWarnings("rawtypes")
     public final class GetLatestVersionApiProviderImpl implements GetLatestVersionApiProvider.Builder {
       private final ImmutableMap.Builder
           <Class<? extends GetLatestVersionContext>, GetLatestVersionApi<?>> builder = ImmutableMap.builder();
