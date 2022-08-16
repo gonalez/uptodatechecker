@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -45,15 +46,17 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   private final Executor executor;
   private final UpdateDownloader updateDownloader;
   private final GetLatestVersionApiProvider latestVersionApiProvider;
+  private final BiFunction<String, String, Boolean> versionMatchStrategy;
 
   public UpToDateCheckerImpl(
       Executor executor,
       UpdateDownloader updateDownloader,
-      GetLatestVersionApiProvider latestVersionApiProvider) {
+      GetLatestVersionApiProvider latestVersionApiProvider,
+      BiFunction<String, String, Boolean> versionMatchStrategy) {
     this.executor = checkNotNull(executor);
     this.updateDownloader = checkNotNull(updateDownloader);
     this.latestVersionApiProvider = checkNotNull(latestVersionApiProvider);
-
+    this.versionMatchStrategy = checkNotNull(versionMatchStrategy);
   }
 
   @Override
@@ -141,7 +144,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
                         .setLatestVersion(latestVersion)
                         // Determine if the version is up-to-date or not by applying the {@code versionMatchStrategy}
                         // to the request version and the {@code latestVersion}
-                        .setIsUpToDate(request.currentVersion().equalsIgnoreCase(latestVersion))
+                        .setIsUpToDate(versionMatchStrategy.apply(request.currentVersion(), latestVersion))
                         .build();
                 if (optionalCallback.isPresent()) {
                   optionalCallback.get().onSuccess(response);

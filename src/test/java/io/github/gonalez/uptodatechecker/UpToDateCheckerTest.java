@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 /** Tests for {@link UpToDateChecker}. */
 public class UpToDateCheckerTest {
@@ -40,6 +41,8 @@ public class UpToDateCheckerTest {
   public static final String RESOURCE_ID = "80940";
 
   private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
+
+  private static final BiFunction<String, String, Boolean> EQUAL_STRATEGY = String::equals;
 
   @TempDir
   private static Path temporaryDirectory;
@@ -56,7 +59,8 @@ public class UpToDateCheckerTest {
             EXECUTOR_SERVICE,
             new FileUpdateDownloader(EXECUTOR_SERVICE, httpClient, Options.DEFAULT_OPTIONS),
             GetLatestVersionApiProvider.of(ImmutableList.of(
-                new ProvidersGetLatestVersionApiCollection(EXECUTOR_SERVICE, httpClient))));
+                new ProvidersGetLatestVersionApiCollection(EXECUTOR_SERVICE, httpClient))),
+            EQUAL_STRATEGY);
 
     checkUpToDateRequest =
         CheckUpToDateRequest.newBuilder()
@@ -99,10 +103,11 @@ public class UpToDateCheckerTest {
         upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
             .requesting(checkUpToDateRequest)
             .then()
-            .download(response -> UpdateDownloaderRequest.newBuilder()
-                .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
-                .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.latestVersion()))
-                .build())
+            .download(response ->
+                UpdateDownloaderRequest.newBuilder()
+                    .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
+                    .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.latestVersion()))
+                    .build())
             .response();
 
     // await result
