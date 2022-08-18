@@ -15,5 +15,5 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-/** Marker interface for the {@link GetLatestVersionApi}. */
-public interface GetLatestVersionContext {}
+/** Marker interface for the {@link VersionProvider}. */
+public interface VersionProviderContext {}

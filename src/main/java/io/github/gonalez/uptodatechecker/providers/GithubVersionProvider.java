@@ -16,20 +16,20 @@
 package io.github.gonalez.uptodatechecker.providers;
 
 import com.google.gson.JsonElement;
-import io.github.gonalez.uptodatechecker.GetLatestVersionApi;
-import io.github.gonalez.uptodatechecker.HttpGetLatestVersionApi;
+import io.github.gonalez.uptodatechecker.VersionProvider;
+import io.github.gonalez.uptodatechecker.HttpVersionProvider;
 import io.github.gonalez.uptodatechecker.http.HttpClient;
 import io.github.gonalez.uptodatechecker.http.HttpRequest;
 
 import java.util.concurrent.Executor;
 
-/** A {@link GetLatestVersionApi} that can get the latest version of an GitHub repository. */
-public class GithubGetLatestVersionApi
-    extends HttpGetLatestVersionApi<GithubGetLatestVersionContext> {
+/** A {@link VersionProvider} that can get the latest version of an GitHub repository. */
+public class GithubVersionProvider
+    extends HttpVersionProvider<GithubVersionProviderContext> {
   private static final String LATEST_VERSION_URL =
       "https://api.github.com/repos/%s/%s/releases/latest";
 
-  public GithubGetLatestVersionApi(Executor executor, HttpClient httpClient) {
+  public GithubVersionProvider(Executor executor, HttpClient httpClient) {
     super(executor, httpClient);
   }
 
@@ -39,12 +39,12 @@ public class GithubGetLatestVersionApi
   }
 
   @Override
-  public Class<GithubGetLatestVersionContext> getContextType() {
-    return GithubGetLatestVersionContext.class;
+  public Class<GithubVersionProviderContext> contextType() {
+    return GithubVersionProviderContext.class;
   }
 
   @Override
-  protected HttpRequest buildRequest(GithubGetLatestVersionContext context) {
+  protected HttpRequest buildRequest(GithubVersionProviderContext context) {
     return HttpRequest.newBuilder()
         .setUrl(String.format(LATEST_VERSION_URL, context.repoOwner(), context.repoName()))
         .build();

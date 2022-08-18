@@ -17,17 +17,21 @@ package io.github.gonalez.uptodatechecker;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-/** Responsible for providing the latest version for a given request. */
-public interface GetLatestVersionApi<Context extends GetLatestVersionContext> {
+/**
+ * Responsible for providing the latest version for a given request.
+ *
+ * @param <Context> type of context that this provider uses to get the latest version.
+ */
+public interface VersionProvider<Context extends VersionProviderContext> {
   /** @return the name of this provider. */
   String name();
 
   /**
    * Returns the type of context that this {@code GetLatestVersionApi} uses to get the {@link
-   * #getLatestVersion(GetLatestVersionContext) latest version}.
+   * #findLatestVersion(VersionProviderContext) latest version}.
    */
-  Class<Context> getContextType();
+  Class<Context> contextType();
 
   /** @return a {@code ListenableFuture<String>} containing the latest version of the given request. */
-  ListenableFuture<String> getLatestVersion(Context context);
+  ListenableFuture<String> findLatestVersion(Context context);
 }

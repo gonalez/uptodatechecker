@@ -16,20 +16,20 @@
 package io.github.gonalez.uptodatechecker.providers;
 
 import com.google.gson.JsonElement;
-import io.github.gonalez.uptodatechecker.GetLatestVersionApi;
-import io.github.gonalez.uptodatechecker.HttpGetLatestVersionApi;
+import io.github.gonalez.uptodatechecker.VersionProvider;
+import io.github.gonalez.uptodatechecker.HttpVersionProvider;
 import io.github.gonalez.uptodatechecker.http.HttpClient;
 import io.github.gonalez.uptodatechecker.http.HttpRequest;
 
 import java.util.concurrent.Executor;
 
-/** A {@link GetLatestVersionApi} that can get the latest version of a Spigot resource. */
-public class SpigetGetLatestVersionApi
-    extends HttpGetLatestVersionApi<SpigetGetLatestVersionContext> {
+/** A {@link VersionProvider} that can get the latest version of a Spigot resource. */
+public class SpigetVersionProvider
+    extends HttpVersionProvider<SpigetVersionProviderContext> {
   private static final String LATEST_VERSION_URL =
       "https://api.spiget.org/v2/resources/%s/versions/latest";
 
-  public SpigetGetLatestVersionApi(Executor executor, HttpClient httpClient) {
+  public SpigetVersionProvider(Executor executor, HttpClient httpClient) {
     super(executor, httpClient);
   }
 
@@ -39,12 +39,12 @@ public class SpigetGetLatestVersionApi
   }
 
   @Override
-  public Class<SpigetGetLatestVersionContext> getContextType() {
-    return SpigetGetLatestVersionContext.class;
+  public Class<SpigetVersionProviderContext> contextType() {
+    return SpigetVersionProviderContext.class;
   }
 
   @Override
-  protected HttpRequest buildRequest(SpigetGetLatestVersionContext context) {
+  protected HttpRequest buildRequest(SpigetVersionProviderContext context) {
     return HttpRequest.newBuilder()
         .setUrl(String.format(LATEST_VERSION_URL, context.resourceId()))
         .build();

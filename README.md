@@ -42,7 +42,7 @@ public class ExampleClass {
             Optional.of(
                 new FileUpdateDownloader(executor, httpClient, Options.DEFAULT_OPTIONS)),
             String::equals);
-    upToDateChecker.addLatestVersionApi(new SpigetGetLatestVersionApi(executor, httpClient));
+    upToDateChecker.addVersionProvider(new SpigetVersionProvider(executor, httpClient));
     
     String resourceId = "...";
     

@@ -40,15 +40,15 @@ public interface UpToDateChecker {
   CheckingUpToDateWithDownloadingAndScheduling checkingUpToDateWithDownloadingAndScheduling();
 
   /**
-   * Adds a {@link GetLatestVersionApi} into this up-to-date-checker. This will be used to determine the
+   * Adds a {@link VersionProvider} into this up-to-date-checker. This will be used to determine the
    * {@link CheckUpToDateResponse#latestVersion()} of the given {@link CheckUpToDateOperation#requesting(
    * CheckUpToDateRequest) request}.
    *
    * <p>This should be called before performing any operations on this up-to-date-checker, i.e
    * ({@link #checkingUpToDateWithDownloadingAndScheduling()}).
    */
-  <Context extends GetLatestVersionContext> ListenableFuture<Void> addLatestVersionApi(
-      GetLatestVersionApi<Context> latestVersionApi);
+  <Context extends VersionProviderContext> ListenableFuture<Void> addVersionProvider(
+      VersionProvider<Context> versionProvider);
 
   /**
    * Functions to be called when we got the response for {@link

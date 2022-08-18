@@ -46,8 +46,8 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   private final Optional<UpdateDownloader> optionalUpdateDownloader;
   private final BiFunction<String, String, Boolean> versionMatchStrategy;
 
-  private final ArrayList<GetLatestVersionApi<? extends GetLatestVersionContext>>
-      latestVersionApis = new ArrayList<>();
+  private final ArrayList<VersionProvider<? extends VersionProviderContext>>
+      providers = new ArrayList<>();
 
   public UpToDateCheckerImpl(
       Executor executor,
@@ -65,25 +65,25 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   }
 
   @Override
-  public <Context extends GetLatestVersionContext> ListenableFuture<Void> addLatestVersionApi(
-      GetLatestVersionApi<Context> latestVersionApi) {
+  public <Context extends VersionProviderContext> ListenableFuture<Void> addVersionProvider(
+      VersionProvider<Context> versionProvider) {
     return LegacyFutures
         .call(() -> {
           synchronized (lock) {
-            latestVersionApis.add(latestVersionApi);
+            providers.add(versionProvider);
           }
           return null;
         }, executor);
   }
 
-  private <Context extends GetLatestVersionContext> GetLatestVersionApi<Context> getLatestVersionApi(
-      Class<? extends GetLatestVersionContext> contextClass) {
+  private <Context extends VersionProviderContext> VersionProvider<Context> getVersionProvider(
+      Class<? extends VersionProviderContext> contextClass) {
     synchronized (lock) {
-      for (GetLatestVersionApi<? extends GetLatestVersionContext> api : latestVersionApis) {
-        if (api.getContextType().isAssignableFrom(contextClass)) {
+      for (VersionProvider<? extends VersionProviderContext> api : providers) {
+        if (api.contextType().isAssignableFrom(contextClass)) {
           @SuppressWarnings("unchecked") // safe
-          GetLatestVersionApi<Context> latestVersionApi =
-              (GetLatestVersionApi<Context>) api;
+          VersionProvider<Context> latestVersionApi =
+              (VersionProvider<Context>) api;
           return latestVersionApi;
         }
       }
@@ -176,14 +176,14 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
       ListenableFuture<String> latestVersionFuture =
           LegacyFutures.callAsync(
               () -> {
-                GetLatestVersionApi<GetLatestVersionContext> getLatestVersionApi =
-                    getLatestVersionApi(request.context().getClass());
+                VersionProvider<VersionProviderContext> getLatestVersionApi =
+                    getVersionProvider(request.context().getClass());
                 if (getLatestVersionApi == null) {
                   return Futures.immediateFailedFuture(
                       UpToDateCheckerExceptionCode.FAIL_TO_PARSE_VERSION_CODE
                           .toException());
                 }
-                return getLatestVersionApi.getLatestVersion(request.context());
+                return getLatestVersionApi.findLatestVersion(request.context());
               },
               executor);
 

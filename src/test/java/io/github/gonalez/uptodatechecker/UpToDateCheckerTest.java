@@ -19,8 +19,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
-import io.github.gonalez.uptodatechecker.providers.SpigetGetLatestVersionApi;
-import io.github.gonalez.uptodatechecker.providers.SpigetGetLatestVersionContext;
+import io.github.gonalez.uptodatechecker.providers.SpigetVersionProvider;
+import io.github.gonalez.uptodatechecker.providers.SpigetVersionProviderContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -58,12 +58,12 @@ public class UpToDateCheckerTest {
             Optional.of(
                 new FileUpdateDownloader(EXECUTOR_SERVICE, httpClient, Options.DEFAULT_OPTIONS)),
             EQUAL_STRATEGY);
-    upToDateChecker.addLatestVersionApi(new SpigetGetLatestVersionApi(EXECUTOR_SERVICE, httpClient));
+    upToDateChecker.addVersionProvider(new SpigetVersionProvider(EXECUTOR_SERVICE, httpClient));
 
     checkUpToDateRequest =
         CheckUpToDateRequest.newBuilder()
             .setContext(
-                SpigetGetLatestVersionContext.newBuilder().setResourceId(RESOURCE_ID).build())
+                SpigetVersionProviderContext.newBuilder().setResourceId(RESOURCE_ID).build())
             .setCurrentVersion("3.9")
             .build();
   }

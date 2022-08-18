@@ -30,7 +30,7 @@ public abstract class CheckUpToDateRequest {
   }
 
   /** @return the context that will be used to get the latest version. */
-  public abstract GetLatestVersionContext context();
+  public abstract VersionProviderContext context();
 
   /**
    * Returns the current version that will be checked against the latest version to check if the
@@ -45,7 +45,7 @@ public abstract class CheckUpToDateRequest {
   @AutoValue.Builder
   public abstract static class Builder {
     /** Sets the context of the request. */
-    public abstract Builder setContext(GetLatestVersionContext context);
+    public abstract Builder setContext(VersionProviderContext context);
 
     /** Sets the current version of the request. */
     public abstract Builder setCurrentVersion(String currentVersion);

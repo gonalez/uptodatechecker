@@ -16,26 +16,26 @@
 package io.github.gonalez.uptodatechecker.providers;
 
 import com.google.auto.value.AutoValue;
-import io.github.gonalez.uptodatechecker.GetLatestVersionContext;
+import io.github.gonalez.uptodatechecker.VersionProviderContext;
 
-/** Context to get the {@link SpigetGetLatestVersionApi latest version} of a Spigot resource. */
+/** Context to get the {@link SpigetVersionProvider latest version} of a Spigot resource. */
 @AutoValue
-public abstract class SpigetGetLatestVersionContext implements GetLatestVersionContext {
-  /** @return a new builder to create a {@link SpigetGetLatestVersionContext}. */
-  public static SpigetGetLatestVersionContext.Builder newBuilder() {
-    return new AutoValue_SpigetGetLatestVersionContext.Builder();
+public abstract class SpigetVersionProviderContext implements VersionProviderContext {
+  /** @return a new builder to create a {@link SpigetVersionProviderContext}. */
+  public static SpigetVersionProviderContext.Builder newBuilder() {
+    return new AutoValue_SpigetVersionProviderContext.Builder();
   }
 
   /** @return the spigot resource-id to get the latest version for. */
   public abstract String resourceId();
 
-  /** Builder for {@link SpigetGetLatestVersionContext}. */
+  /** Builder for {@link SpigetVersionProviderContext}. */
   @AutoValue.Builder
   public abstract static class Builder {
     /** Sets the spigot resource-id that will be used to get the latest version. */
     public abstract Builder setResourceId(String resourceId);
 
-    /** @return a new {@link SpigetGetLatestVersionContext} from this builder. */
-    public abstract SpigetGetLatestVersionContext build();
+    /** @return a new {@link SpigetVersionProviderContext} from this builder. */
+    public abstract SpigetVersionProviderContext build();
   }
 }
