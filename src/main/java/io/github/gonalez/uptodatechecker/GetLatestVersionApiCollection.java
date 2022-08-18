@@ -17,6 +17,7 @@ package io.github.gonalez.uptodatechecker;
 
 import com.google.common.collect.ImmutableList;
 
+/** A collection of {@link GetLatestVersionApi}s. */
 public interface GetLatestVersionApiCollection {
   ImmutableList<GetLatestVersionApi<? extends GetLatestVersionContext>> getLatestVersionApis();
 }

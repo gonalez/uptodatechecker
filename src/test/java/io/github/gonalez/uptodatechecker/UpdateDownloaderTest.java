@@ -15,8 +15,8 @@
  */
 package io.github.gonalez.uptodatechecker;
 
-import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,24 +28,24 @@ import java.nio.file.Path;
 
 /** Tests for {@link UpdateDownloader}. */
 public class UpdateDownloaderTest {
-  private static final String EXAMPLE_DOWNLOAD_URL = "https://www.gstatic.com/icing/idd/apitest/zip_test_folder.zip";
+  private static final String EXAMPLE_DOWNLOAD_URL =
+      "https://www.gstatic.com/icing/idd/apitest/zip_test_folder.zip";
 
-  @TempDir
-  private static Path temporaryDirectory;
+  @TempDir private static Path temporaryDirectory;
 
   private static UpdateDownloader updateDownloader;
-  
+
   @BeforeAll
   static void setup() throws Exception {
     updateDownloader =
         new FileUpdateDownloader(
-            directExecutor(), new HttpClientImpl(directExecutor()),
-            Options.newBuilder().build());
+            directExecutor(), new HttpClientImpl(directExecutor()), Options.newBuilder().build());
   }
-  
+
   @Test
   public void testFileUpdateDownloader() throws Exception {
-    updateDownloader.downloadUpdate(
+    updateDownloader
+        .downloadUpdate(
             UpdateDownloaderRequest.newBuilder()
                 .setUrlToDownload(EXAMPLE_DOWNLOAD_URL)
                 .setDownloadPath(temporaryDirectory, "example.zip")

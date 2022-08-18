@@ -22,25 +22,10 @@ import java.util.function.Function;
 
 /** The entry point of the UpToDateChecker library. */
 public interface UpToDateChecker {
-  /** Functions to be called when we got the response for {@link #checkingUpToDateWithDownloadingAndScheduling()}. */
-  interface Callback {
-    /** Called whenever a response has been completed with no errors. */
-    default void onSuccess(CheckUpToDateResponse response) {}
-    
-    /** Called after {@link #onSuccess(CheckUpToDateResponse)} if the response is up-to-date. */
-    default void onUpToDate(CheckUpToDateResponse response) {}
-    
-    /** Called after {@link #onSuccess(CheckUpToDateResponse)} if the response is not up-to-date. */
-    default void onNotUpToDate(CheckUpToDateResponse response) {}
-    
-    /** Called if any error occurs. */
-    default void onError(Throwable throwable) {}
-  }
-
   /**
-   * The {@link CheckUpToDateOperation operation} on the fluent api that checks if a {@link CheckUpToDateRequest}
-   * is up-to-date, it also provides other {@link DownloadingAndSchedulingOperation operations} for scheduling
-   * and downloading the request.
+   * The {@link CheckUpToDateOperation operation} on the fluent api that checks if a {@link
+   * CheckUpToDateRequest} is up-to-date, it also provides other {@link
+   * DownloadingAndSchedulingOperation operations} for scheduling and downloading the request.
    *
    * <pre>{@code
    * checkingUpToDateWithDownloadingAndScheduling()
@@ -54,20 +39,43 @@ public interface UpToDateChecker {
    */
   CheckingUpToDateWithDownloadingAndScheduling checkingUpToDateWithDownloadingAndScheduling();
 
+  /**
+   * Functions to be called when we got the response for {@link
+   * #checkingUpToDateWithDownloadingAndScheduling()}.
+   */
+  interface Callback {
+    /** Called whenever a response has been completed with no errors. */
+    default void onSuccess(CheckUpToDateResponse response) {}
+
+    /** Called after {@link #onSuccess(CheckUpToDateResponse)} if the response is up-to-date. */
+    default void onUpToDate(CheckUpToDateResponse response) {}
+
+    /** Called after {@link #onSuccess(CheckUpToDateResponse)} if the response is not up-to-date. */
+    default void onNotUpToDate(CheckUpToDateResponse response) {}
+
+    /** Called if any error occurs. */
+    default void onError(Throwable throwable) {}
+  }
+
   /** Operation that allows a combination of two actions to be performed together. */
   interface ThenOperation<T> {
     /** Switch to the next operation. */
     T then();
   }
 
-  /** The base operation of the api required for the basic functionality (checking for up-to-date an url). */
+  /**
+   * The base operation of the api required for the basic functionality (checking for up-to-date an
+   * url).
+   */
   interface CheckUpToDateOperation<T> {
     T requesting(CheckUpToDateRequest checkUpToDateRequest);
   }
 
   /** Operation that adds support for downloading a new update for the up-to-date-checker. */
   interface DownloadingOperation<T> {
-    T download(Function<CheckUpToDateResponse, UpdateDownloaderRequest> computeUpdateDownloaderRequestFunction);
+    T download(
+        Function<CheckUpToDateResponse, UpdateDownloaderRequest>
+            computeUpdateDownloaderRequestFunction);
   }
 
   /** Operation that adds support for scheduling the up-to-date-checker. */
@@ -76,16 +84,20 @@ public interface UpToDateChecker {
   }
 
   /** Operation that is both a {@link DownloadingOperation} and a {@link SchedulingOperation}. */
-  interface DownloadingAndSchedulingOperation<T> extends DownloadingOperation<T>, SchedulingOperation<T> {}
+  interface DownloadingAndSchedulingOperation<T>
+      extends DownloadingOperation<T>, SchedulingOperation<T> {}
 
   /** Represents the composed response from the operations that were called. */
   interface ResponseOperation {
     ListenableFuture<CheckUpToDateResponse> response();
   }
 
-  /** @see #checkingUpToDateWithDownloadingAndScheduling() */
+  /**
+   * @see #checkingUpToDateWithDownloadingAndScheduling()
+   */
   interface CheckingUpToDateWithDownloadingAndScheduling
-      extends CheckUpToDateOperation<CheckingUpToDateWithDownloadingAndScheduling>, ThenOperation<
-         DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>>,
-      ResponseOperation {}
+      extends CheckUpToDateOperation<CheckingUpToDateWithDownloadingAndScheduling>,
+          ThenOperation<
+              DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>>,
+          ResponseOperation {}
 }

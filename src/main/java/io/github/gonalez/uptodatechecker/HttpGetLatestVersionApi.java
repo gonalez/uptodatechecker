@@ -30,9 +30,11 @@ import io.github.gonalez.uptodatechecker.http.HttpRequest;
 import java.util.concurrent.Executor;
 
 /**
- * An {@link GetLatestVersionApi} that make http requests for getting the {@link #getLatestVersion(GetLatestVersionContext)}.
+ * An {@link GetLatestVersionApi} that make http requests for getting the {@link
+ * #getLatestVersion(GetLatestVersionContext)}.
  */
-public abstract class HttpGetLatestVersionApi<T extends GetLatestVersionContext> implements GetLatestVersionApi<T> {
+public abstract class HttpGetLatestVersionApi<T extends GetLatestVersionContext>
+    implements GetLatestVersionApi<T> {
   private static final JsonParser JSON_PARSER = new JsonParser();
 
   private final Executor executor;
@@ -60,10 +62,12 @@ public abstract class HttpGetLatestVersionApi<T extends GetLatestVersionContext>
                 jsonElement = new JsonPrimitive(response.bodyString());
               }
               return Futures.immediateFuture(readVersion(jsonElement));
-            }, executor),
+            },
+            executor),
         Exception.class,
         cause -> {
           return Futures.immediateFailedFuture(cause);
-        }, executor);
+        },
+        executor);
   }
 }

@@ -44,8 +44,7 @@ public class UpToDateCheckerTest {
 
   private static final BiFunction<String, String, Boolean> EQUAL_STRATEGY = String::equals;
 
-  @TempDir
-  private static Path temporaryDirectory;
+  @TempDir private static Path temporaryDirectory;
 
   private static UpToDateChecker upToDateChecker;
 
@@ -58,13 +57,15 @@ public class UpToDateCheckerTest {
         new UpToDateCheckerImpl(
             EXECUTOR_SERVICE,
             new FileUpdateDownloader(EXECUTOR_SERVICE, httpClient, Options.DEFAULT_OPTIONS),
-            GetLatestVersionApiProvider.of(ImmutableList.of(
-                new ProvidersGetLatestVersionApiCollection(EXECUTOR_SERVICE, httpClient))),
+            GetLatestVersionApiProvider.of(
+                ImmutableList.of(
+                    new ProvidersGetLatestVersionApiCollection(EXECUTOR_SERVICE, httpClient))),
             EQUAL_STRATEGY);
 
     checkUpToDateRequest =
         CheckUpToDateRequest.newBuilder()
-            .setContext(SpigetGetLatestVersionContext.newBuilder().setResourceId(RESOURCE_ID).build())
+            .setContext(
+                SpigetGetLatestVersionContext.newBuilder().setResourceId(RESOURCE_ID).build())
             .setCurrentVersion("3.9")
             .build();
   }
@@ -77,15 +78,19 @@ public class UpToDateCheckerTest {
         CheckUpToDateRequest.newBuilder()
             .setContext(checkUpToDateRequest.context())
             .setCurrentVersion(checkUpToDateRequest.currentVersion())
-            .setOptionalCallback(Optional.of(new UpToDateChecker.Callback() {
-              @Override
-              public void onSuccess(CheckUpToDateResponse response) {
-                atomicInteger.incrementAndGet();
-              }
-            })).build();
+            .setOptionalCallback(
+                Optional.of(
+                    new UpToDateChecker.Callback() {
+                      @Override
+                      public void onSuccess(CheckUpToDateResponse response) {
+                        atomicInteger.incrementAndGet();
+                      }
+                    }))
+            .build();
 
     ListenableFuture<CheckUpToDateResponse> responseFuture =
-        upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
+        upToDateChecker
+            .checkingUpToDateWithDownloadingAndScheduling()
             .requesting(scheduleRequest)
             .then()
             .schedule(1, TimeUnit.SECONDS)
@@ -100,14 +105,19 @@ public class UpToDateCheckerTest {
   @Test
   public void testDownloading() throws Exception {
     ListenableFuture<CheckUpToDateResponse> responseFuture =
-        upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
+        upToDateChecker
+            .checkingUpToDateWithDownloadingAndScheduling()
             .requesting(checkUpToDateRequest)
             .then()
-            .download(response ->
-                UpdateDownloaderRequest.newBuilder()
-                    .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
-                    .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.latestVersion()))
-                    .build())
+            .download(
+                response ->
+                    UpdateDownloaderRequest.newBuilder()
+                        .setUrlToDownload(
+                            DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(RESOURCE_ID))
+                        .setDownloadPath(
+                            temporaryDirectory,
+                            String.format("update-%s.jar", response.latestVersion()))
+                        .build())
             .response();
 
     // await result

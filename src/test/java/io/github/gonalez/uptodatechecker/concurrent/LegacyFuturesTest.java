@@ -15,8 +15,8 @@
  */
 package io.github.gonalez.uptodatechecker.concurrent;
 
-import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -31,21 +31,22 @@ public class LegacyFuturesTest {
   public void testCatchingAsync() throws Exception {
     ListenableFuture<String> future =
         LegacyFutures.catchingAsync(
-            LegacyFutures.callAsync(() -> {
-              throw new Exception();
-              }, directExecutor()),
+            LegacyFutures.callAsync(
+                () -> {
+                  throw new Exception();
+                },
+                directExecutor()),
             Exception.class,
-            e -> Futures.immediateFuture(BAR), directExecutor());
+            e -> Futures.immediateFuture(BAR),
+            directExecutor());
     assertThat(future.get()).isEqualTo(BAR);
   }
-  
+
   @Test
   public void testTransformAsync() throws Exception {
     ListenableFuture<String> future =
         LegacyFutures.transformAsync(
-            Futures.immediateFuture(BAR),
-            s -> Futures.immediateFuture(FOO),
-            directExecutor());
+            Futures.immediateFuture(BAR), s -> Futures.immediateFuture(FOO), directExecutor());
     assertThat(future.get()).isEqualTo(FOO);
   }
 }

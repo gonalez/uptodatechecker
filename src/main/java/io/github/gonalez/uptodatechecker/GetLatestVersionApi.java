@@ -23,8 +23,8 @@ public interface GetLatestVersionApi<Context extends GetLatestVersionContext> {
   String name();
 
   /**
-   * Returns the type of context that this {@code GetLatestVersionApi} uses to get the
-   * {@link #getLatestVersion(GetLatestVersionContext) latest version}.
+   * Returns the type of context that this {@code GetLatestVersionApi} uses to get the {@link
+   * #getLatestVersion(GetLatestVersionContext) latest version}.
    */
   Class<Context> getContextType();
 

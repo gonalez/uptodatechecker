@@ -17,11 +17,9 @@ package io.github.gonalez.uptodatechecker.http;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import io.github.gonalez.uptodatechecker.Options;
 import io.github.gonalez.uptodatechecker.UpToDateCheckerExceptionCode;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
@@ -47,7 +45,8 @@ public class HttpClientImpl implements HttpClient {
     try {
       url = new URL(request.url());
     } catch (MalformedURLException e) {
-      return Futures.immediateFailedFuture(UpToDateCheckerExceptionCode.INVALID_URL_CODE.toException());
+      return Futures.immediateFailedFuture(
+          UpToDateCheckerExceptionCode.INVALID_URL_CODE.toException());
     }
     return LegacyFutures.catchingAsync(
         LegacyFutures.callAsync(
@@ -66,11 +65,11 @@ public class HttpClientImpl implements HttpClient {
                   urlConnection.connect();
                   responseCode = urlConnection.getResponseCode();
                 } catch (IOException e) {
-                  return Futures.immediateFailedFuture(UpToDateCheckerExceptionCode.FAIL_TO_CONNECT_CODE.toException());
+                  return Futures.immediateFailedFuture(
+                      UpToDateCheckerExceptionCode.FAIL_TO_CONNECT_CODE.toException());
                 }
                 HttpResponse.Builder builder =
-                    HttpResponse.newBuilder()
-                        .setResponseCode(responseCode);
+                    HttpResponse.newBuilder().setResponseCode(responseCode);
                 try (InputStream input = urlConnection.getInputStream()) {
                   builder.setBody(ByteStreams.toByteArray(input));
                 }
@@ -80,8 +79,10 @@ public class HttpClientImpl implements HttpClient {
                   urlConnection.disconnect();
                 }
               }
-            }, executor),
+            },
+            executor),
         Exception.class,
-        Futures::immediateFailedFuture, executor);
+        Futures::immediateFailedFuture,
+        executor);
   }
 }

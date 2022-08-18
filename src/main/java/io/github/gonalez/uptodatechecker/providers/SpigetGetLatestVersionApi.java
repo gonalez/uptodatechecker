@@ -24,8 +24,10 @@ import io.github.gonalez.uptodatechecker.http.HttpRequest;
 import java.util.concurrent.Executor;
 
 /** A {@link GetLatestVersionApi} that can get the latest version of a Spigot resource. */
-public class SpigetGetLatestVersionApi extends HttpGetLatestVersionApi<SpigetGetLatestVersionContext> {
-  private static final String LATEST_VERSION_URL = "https://api.spiget.org/v2/resources/%s/versions/latest";
+public class SpigetGetLatestVersionApi
+    extends HttpGetLatestVersionApi<SpigetGetLatestVersionContext> {
+  private static final String LATEST_VERSION_URL =
+      "https://api.spiget.org/v2/resources/%s/versions/latest";
 
   public SpigetGetLatestVersionApi(Executor executor, HttpClient httpClient) {
     super(executor, httpClient);
@@ -43,14 +45,13 @@ public class SpigetGetLatestVersionApi extends HttpGetLatestVersionApi<SpigetGet
 
   @Override
   protected HttpRequest buildRequest(SpigetGetLatestVersionContext context) {
-    return HttpRequest.newBuilder().setUrl(String.format(LATEST_VERSION_URL, context.resourceId())).build();
+    return HttpRequest.newBuilder()
+        .setUrl(String.format(LATEST_VERSION_URL, context.resourceId()))
+        .build();
   }
 
   @Override
   protected String readVersion(JsonElement jsonElement) {
-    return jsonElement
-        .getAsJsonObject()
-        .get("name")
-        .getAsString();
+    return jsonElement.getAsJsonObject().get("name").getAsString();
   }
 }

@@ -23,9 +23,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A {@link AbstractFuture} that is also a runnable, it allows to repeat the possible result of the future until
- * it is {@link #cancel(boolean) cancelled}, we wait {@code period} of the {@code timeUnit} to set the next result
- * of this future, the result is based on the {@code callable}.
+ * A {@link AbstractFuture} that is also a runnable, it allows to repeat the possible result of the
+ * future until it is {@link #cancel(boolean) cancelled}, we wait {@code period} of the {@code
+ * timeUnit} to set the next result of this future, the result is based on the {@code callable}.
  */
 @SuppressWarnings("UnstableApiUsage")
 final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runnable {
@@ -33,7 +33,7 @@ final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runn
   private final long period;
   private final TimeUnit timeUnit;
   private final boolean shouldCancelOnFailure;
-  
+
   private final AtomicBoolean cancelled = new AtomicBoolean();
 
   public RepeatingCallableFuture(
@@ -43,7 +43,7 @@ final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runn
     this.timeUnit = timeUnit;
     this.shouldCancelOnFailure = shouldCancelOnFailure;
   }
-  
+
   @Override
   public void run() {
     while (!isCancelled()) {
@@ -53,7 +53,8 @@ final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runn
         }
         timeUnit.sleep(period);
         if (isCancelled()) {
-          cancel(false); break;
+          cancel(false);
+          break;
         }
         setFuture(callable.call());
       } catch (InterruptedException interruptedException) {
@@ -70,12 +71,12 @@ final class RepeatingCallableFuture<V> extends AbstractFuture<V> implements Runn
       }
     }
   }
-  
+
   @Override
   public boolean isCancelled() {
     return cancelled.get();
   }
-  
+
   @Override
   public boolean cancel(boolean mayInterruptIfRunning) {
     return cancelled.compareAndSet(false, true);

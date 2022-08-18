@@ -23,19 +23,20 @@ import javax.annotation.Nullable;
 public enum UpToDateCheckerExceptionCode {
   // Unspecified
   UNSET_CODE(0),
-  
+
   // Url related errors
   INVALID_URL_CODE(300),
   FAIL_TO_CONNECT_CODE(301),
-  
+
   // Parse related errors
   FAIL_TO_PARSE_VERSION_CODE(302),
 
   // Version related errors
   FAIL_TO_GET_LATEST_VERSION_FROM_CONTEXT(500);
-  
+
   // Mapping of all exception code values by its {@code errorCode}
   private static final ImmutableMap<Integer, UpToDateCheckerExceptionCode> CODES_TO_EXCEPTION_CODE;
+
   static {
     ImmutableMap.Builder<Integer, UpToDateCheckerExceptionCode> builder = ImmutableMap.builder();
     for (UpToDateCheckerExceptionCode code : values()) {
@@ -43,19 +44,22 @@ public enum UpToDateCheckerExceptionCode {
     }
     CODES_TO_EXCEPTION_CODE = builder.build();
   }
-  
-  /** @return a {@link UpToDateCheckerExceptionCode} for the given {@code errorCode} or null if not code is found. */
+
+  final int errorCode;
+
+  UpToDateCheckerExceptionCode(int errorCode) {
+    this.errorCode = errorCode;
+  }
+
+  /**
+   * @return a {@link UpToDateCheckerExceptionCode} for the given {@code errorCode} or null if not
+   *     code is found.
+   */
   @Nullable
   public static UpToDateCheckerExceptionCode fromErrorCode(int errorCode) {
     return CODES_TO_EXCEPTION_CODE.get(errorCode);
   }
-  
-  final int errorCode;
-  
-  UpToDateCheckerExceptionCode(int errorCode) {
-    this.errorCode = errorCode;
-  }
-  
+
   /** Converts this code to a {@link UpToDateCheckerException}. */
   public UpToDateCheckerException toException() {
     return new UpToDateCheckerException(this);

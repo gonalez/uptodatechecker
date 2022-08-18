@@ -28,60 +28,68 @@ import java.util.function.Function;
 /** Wrapper around {@link Futures} to initially support older versions of Guava's futures. */
 @SuppressWarnings("UnstableApiUsage")
 public final class LegacyFutures {
-  
+  private LegacyFutures() {}
+
   public static <V> ListenableFuture<V> callAsync(AsyncCallable<V> callable, Executor executor) {
     AwaitingSettableFuture<V> settableFuture = AwaitingSettableFuture.awaiting(executor);
-    executor.execute(() -> {
-      try {
-        settableFuture.setFuture(callable.call());
-      } catch (Exception e) {
-        settableFuture.setException(e);
-      }
-    });
+    executor.execute(
+        () -> {
+          try {
+            settableFuture.setFuture(callable.call());
+          } catch (Exception e) {
+            settableFuture.setException(e);
+          }
+        });
     return settableFuture;
   }
-  
+
   public static <V, T extends Throwable> ListenableFuture<V> catchingAsync(
-      ListenableFuture<V> input, Class<T> exceptionType,
-      Function<T, ListenableFuture<V>> fallbackFunction, Executor executor) {
+      ListenableFuture<V> input,
+      Class<T> exceptionType,
+      Function<T, ListenableFuture<V>> fallbackFunction,
+      Executor executor) {
     AwaitingSettableFuture<V> settableFuture = AwaitingSettableFuture.awaiting(executor);
-    Futures.addCallback(input, new FutureCallback<>() {
-      @Override
-      public void onSuccess(V result) {
-        settableFuture.setFuture(input);
-      }
-  
-      @SuppressWarnings("unchecked")
-      @Override
-      public void onFailure(Throwable t) {
-        if (exceptionType.isInstance(t)) {
-          settableFuture.setFuture(fallbackFunction.apply((T)t));
-        }
-         else
-           settableFuture.setException(t);
-      }
-    }, executor);
+    Futures.addCallback(
+        input,
+        new FutureCallback<>() {
+          @Override
+          public void onSuccess(V result) {
+            settableFuture.setFuture(input);
+          }
+
+          @SuppressWarnings("unchecked")
+          @Override
+          public void onFailure(Throwable t) {
+            if (exceptionType.isInstance(t)) {
+              settableFuture.setFuture(fallbackFunction.apply((T) t));
+            } else settableFuture.setException(t);
+          }
+        },
+        executor);
     return settableFuture;
   }
-  
+
   public static <V, T> ListenableFuture<T> transformAsync(
       ListenableFuture<V> future, AsyncFunction<V, T> transformFunction, Executor executor) {
     AwaitingSettableFuture<T> settableFuture = AwaitingSettableFuture.awaiting(executor);
-    Futures.addCallback(callAsync(returningAsyncFuture(future), executor), new FutureCallback<>() {
-      @Override
-      public void onSuccess(V result) {
-        try {
-          settableFuture.setFuture(transformFunction.apply(result));
-        } catch (Exception e) {
-          onFailure(e);
-        }
-      }
-  
-      @Override
-      public void onFailure(Throwable t) {
-        settableFuture.setException(t);
-      }
-    }, executor);
+    Futures.addCallback(
+        callAsync(returningAsyncFuture(future), executor),
+        new FutureCallback<>() {
+          @Override
+          public void onSuccess(V result) {
+            try {
+              settableFuture.setFuture(transformFunction.apply(result));
+            } catch (Exception e) {
+              onFailure(e);
+            }
+          }
+
+          @Override
+          public void onFailure(Throwable t) {
+            settableFuture.setException(t);
+          }
+        },
+        executor);
     return settableFuture;
   }
 
@@ -92,11 +100,9 @@ public final class LegacyFutures {
     executor.execute(repeatingInterruptedCallable);
     return repeatingInterruptedCallable;
   }
-  
+
   /** @return a {@code AsyncCallable} which returns the given future. */
   private static <V> AsyncCallable<V> returningAsyncFuture(ListenableFuture<V> future) {
     return () -> future;
   }
-
-  private LegacyFutures() {}
 }

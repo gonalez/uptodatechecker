@@ -22,53 +22,54 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 /** Exception thrown by {@link UpToDateChecker} when any error occurs. */
 public class UpToDateCheckerException extends Exception {
-  /** Creates a new builder to create a {@link UpToDateCheckerException}. */
-  public static Builder newBuilder() {
-    return new Builder();
-  }
-  
-  /** Creates a {@link UpToDateCheckerException} from the given exception code. */
-  public static UpToDateCheckerException ofCode(UpToDateCheckerExceptionCode code) {
-    return new UpToDateCheckerException(code);
-  }
-  
   private final UpToDateCheckerExceptionCode exceptionCode;
-  
+
   public UpToDateCheckerException(UpToDateCheckerExceptionCode exceptionCode) {
     super();
     this.exceptionCode = checkNotNull(exceptionCode);
   }
-  
+
   public UpToDateCheckerException(String message, UpToDateCheckerExceptionCode exceptionCode) {
     super(message);
     this.exceptionCode = checkNotNull(exceptionCode);
   }
-  
-  public UpToDateCheckerException(String message, Throwable cause, UpToDateCheckerExceptionCode exceptionCode) {
+
+  public UpToDateCheckerException(
+      String message, Throwable cause, UpToDateCheckerExceptionCode exceptionCode) {
     super(message, cause);
     this.exceptionCode = checkNotNull(exceptionCode);
   }
-  
+
+  /** Creates a new builder to create a {@link UpToDateCheckerException}. */
+  public static Builder newBuilder() {
+    return new Builder();
+  }
+
+  /** Creates a {@link UpToDateCheckerException} from the given exception code. */
+  public static UpToDateCheckerException ofCode(UpToDateCheckerExceptionCode code) {
+    return new UpToDateCheckerException(code);
+  }
+
   public UpToDateCheckerExceptionCode getExceptionCode() {
     return exceptionCode;
   }
-  
+
   public <V> ListenableFuture<V> toImmediateFailedFuture() {
     return Futures.immediateFailedFuture(this);
   }
-  
+
   /** Builder for {@link UpToDateCheckerException}. */
   public static final class Builder {
     private UpToDateCheckerExceptionCode exceptionCode;
-  
+
     Builder() {}
-    
+
     public Builder setExceptionCode(UpToDateCheckerExceptionCode exceptionCode) {
       this.exceptionCode = exceptionCode;
       return this;
     }
-    
-    /** Creates a new {@link UpToDateCheckerException} from this builder. */
+
+    /** @return a new {@link UpToDateCheckerException} based from this builder. */
     public UpToDateCheckerException build() {
       checkNotNull(exceptionCode);
       return new UpToDateCheckerException(exceptionCode);

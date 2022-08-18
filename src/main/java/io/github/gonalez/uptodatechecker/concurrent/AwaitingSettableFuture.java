@@ -26,20 +26,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * An {@link AbstractFuture} which acts like as a {@code SettableFuture} except that it controls
- * how long we can wait to have the result of the {@code SettableFuture}.
+ * An {@link AbstractFuture} which acts like as a {@code SettableFuture} except that it controls how
+ * long we can wait to have the result of the {@code SettableFuture}.
  */
 @SuppressWarnings("UnstableApiUsage")
 public final class AwaitingSettableFuture<V> extends AbstractFuture<V> implements Runnable {
-  public static <V> AwaitingSettableFuture<V> awaiting(Executor executor) {
-    return new AwaitingSettableFuture<>(0, TimeUnit.SECONDS, executor);
-  }
-  
   private final CountDownLatch futureInProgressLatch = new CountDownLatch(1);
-  
   private final int maxDelay;
   private final TimeUnit timeUnit;
-  
   /**
    * Creates a AwaitingSettableFuture with the given specifications.
    *
@@ -53,35 +47,38 @@ public final class AwaitingSettableFuture<V> extends AbstractFuture<V> implement
     checkNotNull(executor);
     addListener(futureInProgressLatch::countDown, executor);
   }
-  
+
+  public static <V> AwaitingSettableFuture<V> awaiting(Executor executor) {
+    return new AwaitingSettableFuture<>(0, TimeUnit.SECONDS, executor);
+  }
+
   @Override
   public void run() {
     try {
       boolean cancelled = false;
-      if (maxDelay > 0)
-        cancelled = futureInProgressLatch.await(maxDelay, timeUnit);
-      else
-        futureInProgressLatch.await();
+      if (maxDelay > 0) cancelled = futureInProgressLatch.await(maxDelay, timeUnit);
+      else futureInProgressLatch.await();
       if (!cancelled && !isDone()) {
-        setException(new TimeoutException(
-            String.format(
-                "Future timed out after %d %s", maxDelay, timeUnit.toString().toLowerCase())));
+        setException(
+            new TimeoutException(
+                String.format(
+                    "Future timed out after %d %s", maxDelay, timeUnit.toString().toLowerCase())));
       }
     } catch (InterruptedException interruptedException) {
       setException(interruptedException);
     }
   }
-  
+
   @Override
   public boolean set(V value) {
     return super.set(value);
   }
-  
+
   @Override
   public boolean setException(Throwable throwable) {
     return super.setException(throwable);
   }
-  
+
   @Override
   public boolean setFuture(ListenableFuture<? extends V> future) {
     return super.setFuture(future);

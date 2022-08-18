@@ -17,7 +17,10 @@ package io.github.gonalez.uptodatechecker;
 
 import java.util.function.Function;
 
-/** Common downloading urls to be used for the {@link io.github.gonalez.uptodatechecker.UpdateDownloaderRequest#urlToDownload()}. */
+/**
+ * Common downloading urls to be used for the {@link
+ * io.github.gonalez.uptodatechecker.UpdateDownloaderRequest#urlToDownload()}.
+ */
 public enum DownloadingUrls implements Function<String, String> {
   // File downloading APIs
   SPIGET_DOWNLOAD_UPDATE_FILE_URL("https://api.spiget.org/v2/resources/%s/download");

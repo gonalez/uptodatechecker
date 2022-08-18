@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * This package contains the core API for the UpToDateChecker library.
- */
+/** This package contains the core API for the UpToDateChecker library. */
 package io.github.gonalez.uptodatechecker;

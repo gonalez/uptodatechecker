@@ -29,8 +29,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /** A {@link UpdateDownloader} which can download update files to a path. */
@@ -39,25 +37,19 @@ public class FileUpdateDownloader implements UpdateDownloader {
   private final Executor executor;
   private final HttpClient httpClient;
   private final Options options;
-  
-  public FileUpdateDownloader(
-      Executor executor,
-      HttpClient httpClient,
-      Options options) {
+
+  public FileUpdateDownloader(Executor executor, HttpClient httpClient, Options options) {
     this.executor = checkNotNull(executor);
     this.httpClient = checkNotNull(httpClient);
     this.options = checkNotNull(options);
   }
-  
+
   @Override
   public ListenableFuture<Boolean> downloadUpdate(UpdateDownloaderRequest request) {
     File file = new File(request.downloadPath());
     return LegacyFutures.transformAsync(
         httpClient.requestAsync(
-            HttpRequest.newBuilder()
-                .setUrl(request.urlToDownload())
-                .setOptions(options)
-                .build()),
+            HttpRequest.newBuilder().setUrl(request.urlToDownload()).setOptions(options).build()),
         httpResponse -> {
           try (FileOutputStream outputStream = new FileOutputStream(file)) {
             ByteStreams.copy(new ByteArrayInputStream(httpResponse.body()), outputStream);
@@ -65,6 +57,7 @@ public class FileUpdateDownloader implements UpdateDownloader {
             return Futures.immediateFailedFuture(e);
           }
           return Futures.immediateFuture(true);
-        }, executor);
+        },
+        executor);
   }
 }

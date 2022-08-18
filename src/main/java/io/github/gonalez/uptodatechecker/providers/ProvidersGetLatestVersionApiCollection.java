@@ -23,12 +23,15 @@ import io.github.gonalez.uptodatechecker.GetLatestVersionApiCollection;
 
 import java.util.concurrent.Executor;
 
-/** A {@link GetLatestVersionApiCollection} that supplies {@link HttpGetLatestVersionApi http based} apis of this package. */
+/**
+ * A {@link GetLatestVersionApiCollection} that supplies {@link HttpGetLatestVersionApi http based}
+ * apis of this package.
+ */
 public class ProvidersGetLatestVersionApiCollection extends DefaultGetLatestVersionApiCollection {
-  public ProvidersGetLatestVersionApiCollection(
-      Executor executor, HttpClient httpClient) {
-    super(ImmutableList.of(
-        new GithubGetLatestVersionApi(executor, httpClient),
-        new SpigetGetLatestVersionApi(executor, httpClient)));
+  public ProvidersGetLatestVersionApiCollection(Executor executor, HttpClient httpClient) {
+    super(
+        ImmutableList.of(
+            new GithubGetLatestVersionApi(executor, httpClient),
+            new SpigetGetLatestVersionApi(executor, httpClient)));
   }
 }

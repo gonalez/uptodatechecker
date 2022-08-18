@@ -24,33 +24,37 @@ import java.util.Optional;
 @AutoValue
 @Immutable
 public abstract class CheckUpToDateRequest {
+  /** @return a new builder to create a {@link CheckUpToDateRequest}. */
+  public static CheckUpToDateRequest.Builder newBuilder() {
+    return new AutoValue_CheckUpToDateRequest.Builder().setOptionalCallback(Optional.empty());
+  }
+
   /** @return the context that will be used to get the latest version. */
   public abstract GetLatestVersionContext context();
 
   /**
-   * Returns the current version that will be checked against the latest version to
-   * check if the response is up-to-date or not.
+   * Returns the current version that will be checked against the latest version to check if the
+   * response is up-to-date or not.
    */
   public abstract String currentVersion();
 
   /** @return the optional callback to invoke when executing the up-to-date checker. */
   public abstract Optional<UpToDateChecker.Callback> optionalCallback();
 
-  /** @return a new builder to create a {@link CheckUpToDateRequest}. */
-  public static CheckUpToDateRequest.Builder newBuilder() {
-    return new AutoValue_CheckUpToDateRequest.Builder()
-        .setOptionalCallback(Optional.empty());
-  }
-
   /** Builder for {@link CheckUpToDateRequest}. */
   @AutoValue.Builder
   public abstract static class Builder {
+    /** Sets the context of the request. */
     public abstract Builder setContext(GetLatestVersionContext context);
+
+    /** Sets the current version of the request. */
     public abstract Builder setCurrentVersion(String currentVersion);
 
-    public abstract Builder setOptionalCallback(Optional<UpToDateChecker.Callback> optionalCallback);
+    /** Sets the optional callback of the request. */
+    public abstract Builder setOptionalCallback(
+        Optional<UpToDateChecker.Callback> optionalCallback);
 
-    /** @return a new {@link CheckUpToDateRequest} from this builder. */
-    public abstract CheckUpToDateRequest  build();
+    /** @return a new {@link CheckUpToDateRequest} based from this builder. */
+    public abstract CheckUpToDateRequest build();
   }
 }

@@ -24,8 +24,10 @@ import io.github.gonalez.uptodatechecker.http.HttpRequest;
 import java.util.concurrent.Executor;
 
 /** A {@link GetLatestVersionApi} that can get the latest version of an GitHub repository. */
-public class GithubGetLatestVersionApi extends HttpGetLatestVersionApi<GithubGetLatestVersionContext> {
-  private static final String LATEST_VERSION_URL = "https://api.github.com/repos/%s/%s/releases/latest";
+public class GithubGetLatestVersionApi
+    extends HttpGetLatestVersionApi<GithubGetLatestVersionContext> {
+  private static final String LATEST_VERSION_URL =
+      "https://api.github.com/repos/%s/%s/releases/latest";
 
   public GithubGetLatestVersionApi(Executor executor, HttpClient httpClient) {
     super(executor, httpClient);
@@ -43,14 +45,13 @@ public class GithubGetLatestVersionApi extends HttpGetLatestVersionApi<GithubGet
 
   @Override
   protected HttpRequest buildRequest(GithubGetLatestVersionContext context) {
-    return HttpRequest.newBuilder().setUrl(String.format(LATEST_VERSION_URL, context.repoOwner(), context.repoName())).build();
+    return HttpRequest.newBuilder()
+        .setUrl(String.format(LATEST_VERSION_URL, context.repoOwner(), context.repoName()))
+        .build();
   }
 
   @Override
   protected String readVersion(JsonElement jsonElement) {
-    return jsonElement
-        .getAsJsonObject()
-        .get("tag_name")
-        .getAsString();
+    return jsonElement.getAsJsonObject().get("tag_name").getAsString();
   }
 }

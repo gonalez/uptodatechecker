@@ -23,6 +23,11 @@ import java.nio.charset.StandardCharsets;
 @AutoValue
 @Immutable
 public abstract class HttpResponse {
+  /** @return a new builder to create a {@link HttpResponse}.*/
+  public static HttpResponse.Builder newBuilder() {
+    return new AutoValue_HttpResponse.Builder();
+  }
+
   /** @return the body of the response. */
   public abstract byte[] body();
 
@@ -34,17 +39,16 @@ public abstract class HttpResponse {
   /** @return the code of the response. */
   public abstract int responseCode();
 
-  /** @return a new builder to create a {@link HttpResponse}. */
-  public static HttpResponse.Builder newBuilder() {
-    return new AutoValue_HttpResponse.Builder();
-  }
-
   /** Builder for {@link HttpResponse}. */
   @AutoValue.Builder
   public abstract static class Builder {
+    /** Sets the body of the response. */
     public abstract Builder setBody(byte[] body);
 
+    /** Sets the code of the response. */
     public abstract Builder setResponseCode(int responseCode);
+
+    /** @return a new {@link HttpResponse} based from this builder. */
     public abstract HttpResponse build();
   }
 }
