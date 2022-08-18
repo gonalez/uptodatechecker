@@ -24,21 +24,15 @@ import javax.annotation.concurrent.Immutable;
 public abstract class Options {
   public static final Options DEFAULT_OPTIONS = Options.newBuilder().build();
 
-  /**
-   * @return a new builder to create a {@link Options}.
-   */
+  /** @return a new builder to create a {@link Options}. */
   public static Builder newBuilder() {
     return new AutoValue_Options.Builder().setConnectTimeout(10000).setReadTimeout(10000);
   }
 
-  /**
-   * @return the timeout for establishing an url connection.
-   */
+  /** @return the timeout for establishing an url connection. */
   public abstract int connectTimeout();
 
-  /**
-   * @return the timeout for reading a response.
-   */
+  /** @return the timeout for reading a response. */
   public abstract int readTimeout();
 
   /** Builder to create {@link Options}s. */
@@ -50,9 +44,7 @@ public abstract class Options {
     /** Sets the timeout for reading a response. */
     public abstract Builder setReadTimeout(int readTimeout);
 
-    /**
-     * @return a new {@link Options} from this builder.
-     */
+    /** @return a new {@link Options} based from this builder. */
     public abstract Options build();
   }
 }
