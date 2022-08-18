@@ -39,22 +39,31 @@ public class ExampleClass {
   public static void main(String[] args) {
     UpToDateChecker upToDateChecker =
         new UpToDateCheckerImpl(executor,
-            new FileUpdateDownloader(executor, httpClient, Options.DEFAULT_OPTIONS),
-            new LibGetLatestVersionApiProviderSupplier(executor, httpClient));
-
+            Optional.of(
+                new FileUpdateDownloader(executor, httpClient, Options.DEFAULT_OPTIONS)),
+            String::equals);
+    upToDateChecker.addLatestVersionApi(new SpigetGetLatestVersionApi(executor, httpClient));
+    
     String resourceId = "...";
     
     // Create the request to be checked to see if the resource is up-to-date
     CheckUpToDateRequest checkUpToDateRequest =
         CheckUpToDateRequest.newBuilder()
-            .setContext(SpigetGetLatestVersionContext.newBuilder().setResourceId(resourceId).build())
+            .setContext(
+                SpigetGetLatestVersionContext.newBuilder()
+                    .setResourceId(resourceId)
+                    .build())
             .setCurrentVersion(currentResourceVersion)
             .setOptionalCallback(Optional.of(new UpToDateChecker.Callback() {
               @Override
-              public void onUpToDate(CheckUpToDateResponse response) {}
+              public void onUpToDate(CheckUpToDateResponse response) {
+                // called if the response is up-to-date
+              }
 
               @Override
-              public void onNotUpToDate(CheckUpToDateResponse response) {}
+              public void onNotUpToDate(CheckUpToDateResponse response) {
+                // called if the response is not up-to-date
+              }
             }))
             .build();
 
@@ -64,8 +73,11 @@ public class ExampleClass {
             .then()
             .download(response ->
                 UpdateDownloaderRequest.newBuilder()
-                    .setUrlToDownload(DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(resourceId))
-                    .setDownloadPath(temporaryDirectory, String.format("update-%s.jar", response.latestVersion()))
+                    .setUrlToDownload(
+                        DownloadingUrls.SPIGET_DOWNLOAD_UPDATE_FILE_URL.apply(resourceId))
+                    .setDownloadPath(
+                        temporaryDirectory, 
+                        String.format("update-%s.jar", response.latestVersion()))
                     .build())
             .response();
     assertTrue(response.isUpToDate());
