@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.AsyncFunction;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -41,6 +42,10 @@ public final class LegacyFutures {
           }
         });
     return settableFuture;
+  }
+
+  public static <V> ListenableFuture<V> call(Callable<V> callable, Executor executor) {
+    return callAsync(() -> Futures.immediateFuture(callable.call()), executor);
   }
 
   public static <V, T extends Throwable> ListenableFuture<V> catchingAsync(

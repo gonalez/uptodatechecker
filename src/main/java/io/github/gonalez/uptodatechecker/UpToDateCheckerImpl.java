@@ -36,27 +36,25 @@ import java.util.function.Function;
  * <p>To determine if something is up-to-date or not, we apply the {@code versionMatchStrategy}
  * function to the given request {@link CheckUpToDateRequest#currentVersion() current version} and
  * the latest version of the request determined by the {@link CheckUpToDateRequest#context()}}.
- *
- * <p>{@code latestVersionApiProviderSupplier} supplies the instance of the {@link
- * GetLatestVersionApiProvider} for getting the appropriate {@link GetLatestVersionApi} of the given
- * {@link CheckUpToDateRequest#context() request context}.
  */
 @SuppressWarnings("UnstableApiUsage")
 @NotThreadSafe
 public class UpToDateCheckerImpl implements UpToDateChecker {
+  private final Object lock = new Object();
+
   private final Executor executor;
-  private final UpdateDownloader updateDownloader;
-  private final GetLatestVersionApiProvider latestVersionApiProvider;
+  private final Optional<UpdateDownloader> optionalUpdateDownloader;
   private final BiFunction<String, String, Boolean> versionMatchStrategy;
+
+  private final ArrayList<GetLatestVersionApi<? extends GetLatestVersionContext>>
+      latestVersionApis = new ArrayList<>();
 
   public UpToDateCheckerImpl(
       Executor executor,
-      UpdateDownloader updateDownloader,
-      GetLatestVersionApiProvider latestVersionApiProvider,
+      Optional<UpdateDownloader> optionalUpdateDownloader,
       BiFunction<String, String, Boolean> versionMatchStrategy) {
     this.executor = checkNotNull(executor);
-    this.updateDownloader = checkNotNull(updateDownloader);
-    this.latestVersionApiProvider = checkNotNull(latestVersionApiProvider);
+    this.optionalUpdateDownloader = checkNotNull(optionalUpdateDownloader);
     this.versionMatchStrategy = checkNotNull(versionMatchStrategy);
   }
 
@@ -64,6 +62,33 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
   public CheckingUpToDateWithDownloadingAndScheduling
       checkingUpToDateWithDownloadingAndScheduling() {
     return new CheckingUpToDateWithDownloadingAndSchedulingImpl();
+  }
+
+  @Override
+  public <Context extends GetLatestVersionContext> ListenableFuture<Void> addLatestVersionApi(
+      GetLatestVersionApi<Context> latestVersionApi) {
+    return LegacyFutures
+        .call(() -> {
+          synchronized (lock) {
+            latestVersionApis.add(latestVersionApi);
+          }
+          return null;
+        }, executor);
+  }
+
+  private <Context extends GetLatestVersionContext> GetLatestVersionApi<Context> getLatestVersionApi(
+      Class<? extends GetLatestVersionContext> contextClass) {
+    synchronized (lock) {
+      for (GetLatestVersionApi<? extends GetLatestVersionContext> api : latestVersionApis) {
+        if (api.getContextType().isAssignableFrom(contextClass)) {
+          @SuppressWarnings("unchecked") // safe
+          GetLatestVersionApi<Context> latestVersionApi =
+              (GetLatestVersionApi<Context>) api;
+          return latestVersionApi;
+        }
+      }
+    }
+    return null;
   }
 
   /** Base implementation for {@link CheckingUpToDateWithDownloadingAndScheduling}. */
@@ -74,9 +99,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
     private final List<Function<ListenableFuture<CheckUpToDateResponse>,
         ListenableFuture<CheckUpToDateResponse>>> operations = new ArrayList<>();
 
-    /**
-     * @return {@code this}.
-     */
+    /** @return {@code this}. */
     CheckingUpToDateWithDownloadingAndScheduling thisInstance() {
       return this;
     }
@@ -96,12 +119,15 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
         @Override
         public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
           operations.add(
-              checkUpToDateResponseListenableFuture ->
+              future ->
                   LegacyFutures.schedulePeriodicAsync(
-                      () -> checkUpToDate(requestBuilder.build(), executor),
+                      () -> {
+                        return checkUpToDate(requestBuilder.build(), executor);
+                      },
                       period,
                       unit,
-                      executor));
+                      executor
+                  ));
           return thisInstance();
         }
 
@@ -109,18 +135,22 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
         public CheckingUpToDateWithDownloadingAndScheduling download(
             Function<CheckUpToDateResponse, UpdateDownloaderRequest>
                 computeUpdateDownloaderRequestFunction) {
+          if (!optionalUpdateDownloader.isPresent()) {
+            return thisInstance();
+          }
           operations.add(
               future ->
                   LegacyFutures.transformAsync(
                       future,
-                      response ->
-                          LegacyFutures.transformAsync(
-                              updateDownloader.downloadUpdate(
-                                  computeUpdateDownloaderRequestFunction.apply(response)),
-                              unused -> {
-                                return Futures.immediateFuture(response);
-                              },
-                              executor),
+                      response -> {
+                        return LegacyFutures.transformAsync(
+                            optionalUpdateDownloader.get().downloadUpdate(
+                                computeUpdateDownloaderRequestFunction.apply(response)),
+                            downloadResult -> {
+                              return Futures.immediateFuture(response);
+                          },
+                          executor);
+                      },
                       executor));
           return thisInstance();
         }
@@ -131,9 +161,8 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
     public ListenableFuture<CheckUpToDateResponse> response() {
       ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
           checkUpToDate(requestBuilder.build(), executor);
-      for (Function<
-              ListenableFuture<CheckUpToDateResponse>, ListenableFuture<CheckUpToDateResponse>>
-          operation : operations) {
+      for (Function<ListenableFuture<CheckUpToDateResponse>,
+          ListenableFuture<CheckUpToDateResponse>> operation : operations) {
         responseListenableFuture = operation.apply(responseListenableFuture);
       }
       return responseListenableFuture;
@@ -141,26 +170,30 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
     private ListenableFuture<CheckUpToDateResponse> checkUpToDate(
         CheckUpToDateRequest request, Executor executor) {
-      Optional<GetLatestVersionApi<GetLatestVersionContext>> maybeGetProviderForContext =
-          latestVersionApiProvider.get(request.context());
-      if (maybeGetProviderForContext.isEmpty()) {
-        return Futures.immediateFailedFuture(
-            UpToDateCheckerException.newBuilder()
-                .setExceptionCode(
-                    UpToDateCheckerExceptionCode.FAIL_TO_GET_LATEST_VERSION_FROM_CONTEXT)
-                .build());
-      }
       Optional<Callback> optionalCallback = request.optionalCallback();
+
+      // Get the latest version (CheckUpToDateResponse#latestVersion)
+      ListenableFuture<String> latestVersionFuture =
+          LegacyFutures.callAsync(
+              () -> {
+                GetLatestVersionApi<GetLatestVersionContext> getLatestVersionApi =
+                    getLatestVersionApi(request.context().getClass());
+                if (getLatestVersionApi == null) {
+                  return Futures.immediateFailedFuture(
+                      UpToDateCheckerExceptionCode.FAIL_TO_PARSE_VERSION_CODE
+                          .toException());
+                }
+                return getLatestVersionApi.getLatestVersion(request.context());
+              },
+              executor);
+
       return LegacyFutures.catchingAsync(
           LegacyFutures.transformAsync(
-              maybeGetProviderForContext.get().getLatestVersion(request.context()),
+              latestVersionFuture,
               latestVersion -> {
                 CheckUpToDateResponse response =
                     CheckUpToDateResponse.newBuilder()
                         .setLatestVersion(latestVersion)
-                        // Determine if the version is up-to-date or not by applying the {@code
-                        // versionMatchStrategy}
-                        // to the request version and the {@code latestVersion}
                         .setIsUpToDate(
                             versionMatchStrategy.apply(request.currentVersion(), latestVersion))
                         .build();
