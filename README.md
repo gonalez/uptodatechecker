@@ -32,8 +32,6 @@ dependencies {
 Here's a short example that shows how to check if a spigot resource is up-to-date or not.
 
 ```java
-import java.util.concurrent.TimeUnit;
-
 public class ExampleClass {
 
   public static void main(String[] args) {
