@@ -23,6 +23,17 @@ import java.util.function.Function;
 /** The entry point of the UpToDateChecker library. */
 public interface UpToDateChecker {
   /**
+   * Adds a {@link VersionProvider} into this up-to-date-checker. This will be used to determine the
+   * {@link CheckUpToDateResponse#latestVersion()} of the given {@link CheckUpToDateOperation#requesting(
+   * CheckUpToDateRequest) request}.
+   *
+   * <p>This should be called before performing any operations on this up-to-date-checker, i.e
+   * ({@link #checkingUpToDateWithDownloadingAndScheduling()}).
+   */
+  <Context extends VersionProviderContext> ListenableFuture<Void> addVersionProvider(
+      VersionProvider<Context> versionProvider);
+
+  /**
    * The {@link CheckUpToDateOperation operation} on the fluent api that checks if a {@link
    * CheckUpToDateRequest} is up-to-date, it also provides other {@link
    * DownloadingAndSchedulingOperation operations} for scheduling and downloading the request.
@@ -38,17 +49,6 @@ public interface UpToDateChecker {
    * }</pre>
    */
   CheckingUpToDateWithDownloadingAndScheduling checkingUpToDateWithDownloadingAndScheduling();
-
-  /**
-   * Adds a {@link VersionProvider} into this up-to-date-checker. This will be used to determine the
-   * {@link CheckUpToDateResponse#latestVersion()} of the given {@link CheckUpToDateOperation#requesting(
-   * CheckUpToDateRequest) request}.
-   *
-   * <p>This should be called before performing any operations on this up-to-date-checker, i.e
-   * ({@link #checkingUpToDateWithDownloadingAndScheduling()}).
-   */
-  <Context extends VersionProviderContext> ListenableFuture<Void> addVersionProvider(
-      VersionProvider<Context> versionProvider);
 
   /**
    * Functions to be called when we got the response for {@link
