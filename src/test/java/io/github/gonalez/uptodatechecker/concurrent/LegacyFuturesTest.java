@@ -16,14 +16,18 @@
 package io.github.gonalez.uptodatechecker.concurrent;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.Executor;
 
 /** Tests for {@link LegacyFutures}. */
 public class LegacyFuturesTest {
+  private static final Executor EXECUTOR = MoreExecutors.directExecutor();
+
   private static final String BAR = "bar";
   private static final String FOO = "foo";
 
@@ -35,10 +39,10 @@ public class LegacyFuturesTest {
                 () -> {
                   throw new Exception();
                 },
-                directExecutor()),
+                EXECUTOR),
             Exception.class,
             e -> Futures.immediateFuture(BAR),
-            directExecutor());
+            EXECUTOR);
     assertThat(future.get()).isEqualTo(BAR);
   }
 
@@ -46,7 +50,7 @@ public class LegacyFuturesTest {
   public void testTransformAsync() throws Exception {
     ListenableFuture<String> future =
         LegacyFutures.transformAsync(
-            Futures.immediateFuture(BAR), s -> Futures.immediateFuture(FOO), directExecutor());
+            Futures.immediateFuture(BAR), s -> Futures.immediateFuture(FOO), EXECUTOR);
     assertThat(future.get()).isEqualTo(FOO);
   }
 }
