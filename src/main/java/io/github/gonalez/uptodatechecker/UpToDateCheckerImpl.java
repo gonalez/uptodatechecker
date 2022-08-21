@@ -60,7 +60,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
   @Override
   public CheckingUpToDateWithDownloadingAndScheduling
-      checkingUpToDateWithDownloadingAndScheduling() {
+  checkWithDownloadingAndScheduling() {
     return new CheckingUpToDateWithDownloadingAndSchedulingImpl();
   }
 

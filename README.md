@@ -98,8 +98,8 @@ Finally, you can send the request to check if the version is up-to-date.
 
 ```
 ListenableFuture<Boolean> response = 
-    upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
-        .requesting(checkUpToDateRequest)
+    upToDateChecker.checkWithDownloadingAndScheduling()
+        .requesting(request)
         .response()
 assertTrue(response.isUpToDate());
 ```
@@ -110,8 +110,8 @@ In this example to download the update if the request is not up-to-date (for thi
 register an `UpdateDownloader` for the checker as explained above):
 
 ```
-upToDateChecker.checkingUpToDateWithDownloadingAndScheduling()
-    .requesting(checkUpToDateRequest)
+checkWithDownloadingAndScheduling()
+    .requesting(request)
     .then()
     .download(response ->
         UpdateDownloaderRequest.newBuilder()

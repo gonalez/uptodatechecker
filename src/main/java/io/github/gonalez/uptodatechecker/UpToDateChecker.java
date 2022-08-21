@@ -33,15 +33,15 @@ public interface UpToDateChecker {
    * CheckUpToDateRequest) request}.
    *
    * <p>This should be called before performing any operations on this up-to-date-checker, i.e
-   * ({@link #checkingUpToDateWithDownloadingAndScheduling()}).
+   * ({@link #checkWithDownloadingAndScheduling()}).
    */
   <Context extends VersionProviderContext> ListenableFuture<Void> addVersionProvider(
       VersionProvider<Context> versionProvider);
 
   /**
    * The {@link CheckUpToDateOperation operation} on the fluent api that checks if a {@link
-   * CheckUpToDateRequest} is up-to-date, it also provides other {@link
-   * DownloadingAndSchedulingOperation operations} for scheduling and downloading the request.
+   * CheckUpToDateRequest} is up-to-date, it also provides other {@link DownloadingAndSchedulingOperation
+   * operations} for scheduling and downloading the request.
    *
    * <pre>{@code
    * checkingUpToDateWithDownloadingAndScheduling()
@@ -53,11 +53,11 @@ public interface UpToDateChecker {
    *     .response();
    * }</pre>
    */
-  CheckingUpToDateWithDownloadingAndScheduling checkingUpToDateWithDownloadingAndScheduling();
+  CheckingUpToDateWithDownloadingAndScheduling checkWithDownloadingAndScheduling();
 
   /**
    * Functions to be called when we got the response for {@link
-   * #checkingUpToDateWithDownloadingAndScheduling()}.
+   * #checkWithDownloadingAndScheduling()}.
    */
   interface Callback {
     /** Called whenever a response has been completed with no errors. */
@@ -109,7 +109,7 @@ public interface UpToDateChecker {
   }
 
   /**
-   * @see #checkingUpToDateWithDownloadingAndScheduling()
+   * @see #checkWithDownloadingAndScheduling()
    */
   interface CheckingUpToDateWithDownloadingAndScheduling
       extends CheckUpToDateOperation<CheckingUpToDateWithDownloadingAndScheduling>,

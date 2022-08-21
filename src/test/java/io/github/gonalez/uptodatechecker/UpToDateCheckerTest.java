@@ -88,7 +88,7 @@ public class UpToDateCheckerTest {
 
     ListenableFuture<CheckUpToDateResponse> responseFuture =
         upToDateChecker
-            .checkingUpToDateWithDownloadingAndScheduling()
+            .checkWithDownloadingAndScheduling()
             .requesting(scheduleRequest)
             .then()
             .schedule(1, TimeUnit.SECONDS)
@@ -104,7 +104,7 @@ public class UpToDateCheckerTest {
   public void testDownloading() throws Exception {
     ListenableFuture<CheckUpToDateResponse> responseFuture =
         upToDateChecker
-            .checkingUpToDateWithDownloadingAndScheduling()
+            .checkWithDownloadingAndScheduling()
             .requesting(checkUpToDateRequest)
             .then()
             .download(
