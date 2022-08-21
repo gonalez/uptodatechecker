@@ -22,6 +22,11 @@ import java.util.function.Function;
 
 /** The entry point of the UpToDateChecker library. */
 public interface UpToDateChecker {
+  /** @return a new builder to create an {@link UpToDateChecker}. */
+  static UpToDateCheckerBuilder newBuilder() {
+    return new UpToDateCheckerBuilder();
+  }
+
   /**
    * Adds a {@link VersionProvider} into this up-to-date-checker. This will be used to determine the
    * {@link CheckUpToDateResponse#latestVersion()} of the given {@link CheckUpToDateOperation#requesting(
