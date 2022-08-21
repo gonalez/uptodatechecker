@@ -17,6 +17,7 @@ package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.github.gonalez.uptodatechecker.http.HttpClientImpl;
 import io.github.gonalez.uptodatechecker.providers.SpigetVersionProvider;
@@ -128,5 +129,56 @@ public class UpToDateCheckerTest {
 
     File downloadedFile = tempFiles[0];
     assertThat(downloadedFile.getName()).startsWith("update");
+  }
+
+  private static class TestVersionProvider implements VersionProvider<VersionProviderContext> {
+
+    @Override
+    public String name() {
+      return "test";
+    }
+
+    @Override
+    public Class<VersionProviderContext> contextType() {
+      return VersionProviderContext.class;
+    }
+
+    @Override
+    public ListenableFuture<String> findLatestVersion(VersionProviderContext context) {
+      return Futures.immediateFuture("0.2");
+    }
+  }
+
+  /**
+   * Make sure we do not check twice or more for the same version after the
+   * response is up-to-date on scheduled checks.
+   */
+  @Test
+  public void versionUpdatedOnUpToDate() throws Exception {
+    AtomicInteger atomicInteger = new AtomicInteger();
+
+    upToDateChecker.addVersionProvider(new TestVersionProvider());
+    ListenableFuture<CheckUpToDateResponse> responseFuture =
+        upToDateChecker.checkWithDownloadingAndScheduling()
+            .requesting(
+                CheckUpToDateRequest.newBuilder()
+                    .setCurrentVersion("0.1")
+                    .setContext(new VersionProviderContext() {})
+                    .setOptionalCallback(Optional.of(new UpToDateChecker.Callback() {
+                      @Override
+                      public void onNotUpToDate(CheckUpToDateResponse response) {
+                        // We should get there once, the latest version is 0.2 and the response
+                        // should be then up-to-date.
+                        atomicInteger.incrementAndGet();
+                      }
+                    })).build())
+            .then()
+            .schedule(1, TimeUnit.SECONDS)
+            .response();
+
+    Thread.sleep(5000);
+    responseFuture.cancel(true);
+
+    assertThat(atomicInteger.get()).isEqualTo(1);
   }
 }

@@ -17,8 +17,10 @@ package io.github.gonalez.uptodatechecker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import io.github.gonalez.uptodatechecker.concurrent.LegacyFutures;
 
 import javax.annotation.concurrent.NotThreadSafe;
@@ -119,15 +121,39 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
         @Override
         public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
           operations.add(
-              future ->
-                  LegacyFutures.schedulePeriodicAsync(
-                      () -> {
-                        return checkUpToDate(requestBuilder.build(), executor);
-                      },
-                      period,
-                      unit,
-                      executor
-                  ));
+              response ->
+                  LegacyFutures.transformAsync(
+                      response,
+                      input -> {
+                        requestBuilder.setCurrentVersion(input.latestVersion());
+                        return LegacyFutures.schedulePeriodicAsync(
+                            () -> {
+                              CheckUpToDateRequest currentRequest = requestBuilder.build();
+
+                              ListenableFuture<CheckUpToDateResponse> responseListenableFuture =
+                                  checkUpToDate(currentRequest, executor);
+                              Futures.addCallback(responseListenableFuture,
+                                  new FutureCallback<CheckUpToDateResponse>() {
+                                    @Override
+                                    public void onSuccess(CheckUpToDateResponse result) {
+                                      if (!result.latestVersion().equals(currentRequest.currentVersion())) {
+                                        // An updated version was found, set the current version to the new, response
+                                        // version, We don't want to check again the old version on next call.
+                                        requestBuilder.setCurrentVersion(result.latestVersion());
+                                      }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Throwable t) {
+
+                                    }
+                                  }, MoreExecutors.directExecutor());
+                              return responseListenableFuture;
+                            },
+                            period,
+                            unit,
+                            executor);
+                      }, executor));
           return thisInstance();
         }
 
@@ -138,20 +164,17 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
           if (!optionalUpdateDownloader.isPresent()) {
             return thisInstance();
           }
-          operations.add(
-              future ->
-                  LegacyFutures.transformAsync(
-                      future,
-                      response -> {
-                        return LegacyFutures.transformAsync(
-                            optionalUpdateDownloader.get().downloadUpdate(
-                                computeUpdateDownloaderRequestFunction.apply(response)),
-                            downloadResult -> {
-                              return Futures.immediateFuture(response);
-                          },
-                          executor);
-                      },
-                      executor));
+          UpdateDownloader updateDownloader = optionalUpdateDownloader.get();
+          operations.add(future ->
+              LegacyFutures.transformAsync(
+                  future,
+                  response -> {
+                    return LegacyFutures.transformAsync(
+                        updateDownloader.downloadUpdate(computeUpdateDownloaderRequestFunction.apply(response)),
+                        unused -> {
+                          return Futures.immediateFuture(response);
+                        }, executor);
+                  }, executor));
           return thisInstance();
         }
       };
