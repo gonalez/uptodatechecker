@@ -31,11 +31,11 @@ dependencies {
 The first step to make use of the API is to create an instance of the `UpToDateChecker`, 
 this is the entry point of the library.
 
-```
+```java
 UpToDateChecker upToDateChecker = UpToDateCheckerBuilder.newBuilder()
-      .setExecutor(MoreExecutors.directExecutor())
-      .setVersionMatchStrategy(String::equals)
-      .build();
+    .setExecutor(MoreExecutors.directExecutor())
+    .setVersionMatchStrategy(String::equals)
+    .build();
 ```
 
 ### Update Downloading
@@ -46,14 +46,14 @@ version is not up-to-date, this can be done by setting an `UpdateDownloader` to 
 The library provides a default implementation of the UpdateDownloader called `FileUpdateDownloader`,
 where the updates will be downloaded to the request path.
 
-```
+```java
 new FileUpdateDownloader(executor, httpClient, options);
 ```
 ## Register a Version Provider
 The api provides a method called `addVersionProvider`, this can be used to register a 
 version provider into the `UpToDateChecker`. A version provider is responsible for obtaining the 
 latest version of something i.e. a GitHub release, for the request context. 
-```
+```java
 upToDateChecker.addVersionProvider(new GithubVersionProvider(executor, httpClient));
 ```
 
@@ -65,7 +65,7 @@ request `currentVersion` to the latest version of the `VersionProvider`.
 There must be a version provider registered for the given request context type, otherwise the
 API won't know what version we're trying to compare against the request, current version.
 
-```
+```java
 CheckUpToDateRequest request = CheckUpToDateRequest.newBuilder()
        .setContext(
            GithubVersionProviderContext.newBuilder()
@@ -79,7 +79,7 @@ CheckUpToDateRequest request = CheckUpToDateRequest.newBuilder()
 ### Callback
 You can also set a callback to the request to listen when we get the latest version or if there are any errors etc.
 
-```
+```java
 request.setOptionalCallback(Optional.of(new UpToDateChecker.Callback() {
       @Override
       public void onUpToDate(CheckUpToDateResponse response) {
@@ -96,7 +96,7 @@ request.setOptionalCallback(Optional.of(new UpToDateChecker.Callback() {
 ## Send the request
 Finally, you can send the request to check if the version is up-to-date.
 
-```
+```java
 ListenableFuture<Boolean> response = 
     upToDateChecker.checkWithDownloadingAndScheduling()
         .requesting(request)
@@ -109,8 +109,8 @@ You can combine several operations to be executed when requesting the latest ver
 In this example to download the update if the request is not up-to-date (for this to work you must 
 register an `UpdateDownloader` for the checker as explained above):
 
-```
-checkWithDownloadingAndScheduling()
+```java
+upToDateChecker.checkWithDownloadingAndScheduling()
     .requesting(request)
     .then()
     .download(response ->
