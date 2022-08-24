@@ -113,11 +113,8 @@ register an `UpdateDownloader` for the checker as explained above):
 upToDateChecker.checkWithDownloadingAndScheduling()
     .requesting(request)
     .then()
-    .download(response ->
-        UpdateDownloaderRequest.newBuilder()
-            .setUrlToDownload(urlToDownload)
-            .setDownloadPath(path)
-            .build())
+    .download(downloadRequest)
+    // ...
     .response();
 ```
 
