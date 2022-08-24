@@ -105,9 +105,9 @@ assertTrue(response.isUpToDate());
 ```
 
 ### Operation Chaining
-You can combine several operations to be executed when requesting the latest version of something,
-In this example to download the update if the request is not up-to-date (for this to work you must 
-register an `UpdateDownloader` for the checker as explained above):
+You can combine several operations to be executed when checking for up-to-date something by using the
+[`ThenOperation`]. This example using the `download` operation to download the update if the request is not up-to-date 
+(for this to work you must register an `UpdateDownloader` as explained in the [Update Downloading](#update-downloading) section):
 
 ```java
 upToDateChecker.checkWithDownloadingAndScheduling()
@@ -121,3 +121,5 @@ upToDateChecker.checkWithDownloadingAndScheduling()
 ## License
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+
+[`ThenOperation`]: https://github.com/gonalez/uptodatechecker/blob/master/src/main/java/io/github/gonalez/uptodatechecker/UpToDateChecker.java#L77
