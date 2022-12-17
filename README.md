@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.gonalez.uptodatechecker:uptodatechecker:0.0.1'
+    implementation 'io.github.gonalez.uptodatechecker:uptodatechecker:0.0.2'
 }
 ```
 
@@ -23,7 +23,7 @@ dependencies {
 <dependency>
    <groupId>io.github.gonalez.uptodatechecker</groupId>
    <artifactId>uptodatechecker</artifactId>
-   <version>0.0.1</version>
+   <version>0.0.2</version>
 </dependency>
 ```
 
@@ -73,7 +73,7 @@ CheckUpToDateRequest request = CheckUpToDateRequest.newBuilder()
              .setRepoName("uptodatechecker")
              .setRepoOwner("gonalez")
              .build())
-       .setCurrentVersion("0.0.1")
+       .setCurrentVersion("0.0.2")
        .build();
 ```
 
