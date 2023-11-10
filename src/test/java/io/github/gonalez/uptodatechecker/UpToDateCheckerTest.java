@@ -65,7 +65,7 @@ public class UpToDateCheckerTest {
         CheckUpToDateRequest.newBuilder()
             .setContext(
                 SpigetVersionProviderContext.newBuilder().setResourceId(RESOURCE_ID).build())
-            .setCurrentVersion("3.9")
+            .setCurrentVersion("4.4")
             .build();
   }
 

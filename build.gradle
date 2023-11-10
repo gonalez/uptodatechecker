@@ -23,6 +23,9 @@ plugins {
 group = 'io.github.gonalez.uptodatechecker'
 version = '0.0.2'
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
 repositories {
     mavenCentral()
     google()

@@ -27,7 +27,7 @@ public enum DownloadingUrls implements Function<String, String> {
 
   final String apiUrl;
 
-  private DownloadingUrls(String apiUrl) {
+  DownloadingUrls(String apiUrl) {
     this.apiUrl = apiUrl;
   }
 

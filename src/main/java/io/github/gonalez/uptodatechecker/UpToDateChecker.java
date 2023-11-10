@@ -17,6 +17,7 @@ package io.github.gonalez.uptodatechecker;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import javax.annotation.CheckReturnValue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -53,6 +54,7 @@ public interface UpToDateChecker {
    *     .response();
    * }</pre>
    */
+  @CheckReturnValue
   CheckingUpToDateWithDownloadingAndScheduling checkWithDownloadingAndScheduling();
 
   /**

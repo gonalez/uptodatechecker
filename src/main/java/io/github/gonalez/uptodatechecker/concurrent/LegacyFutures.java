@@ -56,7 +56,7 @@ public final class LegacyFutures {
     AwaitingSettableFuture<V> settableFuture = AwaitingSettableFuture.awaiting(executor);
     Futures.addCallback(
         input,
-        new FutureCallback<>() {
+        new FutureCallback<V>() {
           @Override
           public void onSuccess(V result) {
             settableFuture.setFuture(input);
@@ -79,7 +79,7 @@ public final class LegacyFutures {
     AwaitingSettableFuture<T> settableFuture = AwaitingSettableFuture.awaiting(executor);
     Futures.addCallback(
         callAsync(returningAsyncFuture(future), executor),
-        new FutureCallback<>() {
+        new FutureCallback<V>() {
           @Override
           public void onSuccess(V result) {
             try {

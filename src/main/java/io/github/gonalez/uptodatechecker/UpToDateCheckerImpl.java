@@ -117,7 +117,7 @@ public class UpToDateCheckerImpl implements UpToDateChecker {
 
     @Override
     public DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling> then() {
-      return new DownloadingAndSchedulingOperation<>() {
+      return new DownloadingAndSchedulingOperation<CheckingUpToDateWithDownloadingAndScheduling>() {
         @Override
         public CheckingUpToDateWithDownloadingAndScheduling schedule(long period, TimeUnit unit) {
           operations.add(
